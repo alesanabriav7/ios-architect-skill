@@ -9,7 +9,28 @@ Pure business models + interfaces. `Foundation` only.
 - Data:
 Repository implementations + persistence mappings.
 - Presentation:
-SwiftUI views, feature components, and view models.
+SwiftUI views, feature components, and view models in the owning feature module.
+
+## Ownership Rules
+
+- Default all new entities/services/repositories/view-models to `Features/{Feature}/...`.
+- Promote code to `Shared` only when at least two features/domains consume the same capability.
+- Keep promoted code domain-scoped (for example `Shared/Settings/...`), not in generic shared buckets.
+- Preserve Domain/Data/Presentation split even inside shared modules.
+
+If the feature includes on-device AI generation, also apply `references/foundation_models.md`:
+
+- Domain: add AI generator protocol and AI input/output models.
+- Data: keep `FoundationModels` session + prompt building here.
+- Presentation: consume protocol only; always support deterministic fallback UX.
+
+If the feature includes Liquid Glass styling, also apply `references/liquid-glass.md`:
+
+- Keep glass APIs in Presentation/shared UI components only.
+- Gate with `#available(iOS 26.0, *)` and provide deterministic fallback materials.
+- Reuse design-system glass components instead of one-off inline styles.
+- Use native `.searchable(...)` for searchable views unless product explicitly requires a custom in-content field.
+- For tab-based features, keep search/filter state scoped per tab and use search-tab APIs (`role: .search`, `tabViewSearchActivation(_:)`) when needed.
 
 ## Domain Templates
 
@@ -21,25 +42,25 @@ import Foundation
 struct {Entity}: Identifiable, Codable, Sendable, Equatable, Hashable {
     let id: String
     var title: String
-    var amount: Decimal
-    var date: Date
-    var category: String
+    var details: String
+    var isCompleted: Bool
     var createdAt: Date
+    var updatedAt: Date
 
     init(
         id: String = UUID().uuidString,
         title: String,
-        amount: Decimal,
-        date: Date = .now,
-        category: String = "",
-        createdAt: Date = .now
+        details: String = "",
+        isCompleted: Bool = false,
+        createdAt: Date = .now,
+        updatedAt: Date = .now
     ) {
         self.id = id
         self.title = title
-        self.amount = amount
-        self.date = date
-        self.category = category
+        self.details = details
+        self.isCompleted = isCompleted
         self.createdAt = createdAt
+        self.updatedAt = updatedAt
     }
 }
 ```
@@ -49,21 +70,32 @@ struct {Entity}: Identifiable, Codable, Sendable, Equatable, Hashable {
 ```swift
 import Foundation
 
+struct {Entity}Filter: Sendable, Equatable {
+    var isCompleted: Bool?
+    var searchText: String?
+
+    init(isCompleted: Bool? = nil, searchText: String? = nil) {
+        self.isCompleted = isCompleted
+        self.searchText = searchText
+    }
+}
+
 protocol {Entity}RepositoryProtocol: Sendable {
     func save(_ item: {Entity}) async throws
     func delete(_ item: {Entity}) async throws
     func fetchAll() async throws -> [{Entity}]
-    func fetch(for month: Date) async throws -> [{Entity}]
+    func fetch(matching filter: {Entity}Filter) async throws -> [{Entity}]
 }
 ```
 
 ## Data Templates
 
-Money rule:
+Mapping rules:
 
-- Domain uses `Decimal`.
-- Persistence uses `Int` cents.
-- Multiply by 100 on save, divide by 100 on load.
+- Keep Domain expressive and persistence primitive.
+- Add explicit mapper paths (`init(from:)` and `toDomain()`).
+- Use stable ordering (`updatedAt` descending) for list-first features.
+- If a domain needs special conversions (for example currency or measurements), document conversion rules beside the mapper.
 
 ### Record
 
@@ -76,28 +108,28 @@ struct {Entity}Record: Codable, FetchableRecord, PersistableRecord, Sendable {
 
     var id: String
     var title: String
-    var amount: Int
-    var date: Date
-    var category: String
+    var details: String
+    var isCompleted: Bool
     var createdAt: Date
+    var updatedAt: Date
 
     init(from entity: {Entity}) {
         self.id = entity.id
         self.title = entity.title
-        self.amount = Int((entity.amount * 100).rounded())
-        self.date = entity.date
-        self.category = entity.category
+        self.details = entity.details
+        self.isCompleted = entity.isCompleted
         self.createdAt = entity.createdAt
+        self.updatedAt = entity.updatedAt
     }
 
     func toDomain() -> {Entity} {
         {Entity}(
             id: id,
             title: title,
-            amount: Decimal(amount) / 100,
-            date: date,
-            category: category,
-            createdAt: createdAt
+            details: details,
+            isCompleted: isCompleted,
+            createdAt: createdAt,
+            updatedAt: updatedAt
         )
     }
 }
@@ -132,21 +164,31 @@ final class {Entity}Repository: {Entity}RepositoryProtocol, Sendable {
     func fetchAll() async throws -> [{Entity}] {
         try await dbManager.reader.read { db in
             try {Entity}Record
-                .order(Column("createdAt").desc)
+                .order(Column("updatedAt").desc)
                 .fetchAll(db)
                 .map { $0.toDomain() }
         }
     }
 
-    func fetch(for month: Date) async throws -> [{Entity}] {
-        let calendar = Calendar.current
-        let start = calendar.date(from: calendar.dateComponents([.year, .month], from: month))!
-        let end = calendar.date(byAdding: .month, value: 1, to: start)!
+    func fetch(matching filter: {Entity}Filter) async throws -> [{Entity}] {
+        try await dbManager.reader.read { db in
+            var request = {Entity}Record
+                .order(Column("updatedAt").desc)
 
-        return try await dbManager.reader.read { db in
-            try {Entity}Record
-                .filter(Column("date") >= start && Column("date") < end)
-                .order(Column("date").desc)
+            if let isCompleted = filter.isCompleted {
+                request = request.filter(Column("isCompleted") == isCompleted)
+            }
+
+            if let searchText = filter.searchText?.trimmingCharacters(in: .whitespacesAndNewlines),
+               !searchText.isEmpty {
+                let pattern = "%\(searchText)%"
+                request = request.filter(
+                    Column("title").like(pattern) ||
+                    Column("details").like(pattern)
+                )
+            }
+
+            return try request
                 .fetchAll(db)
                 .map { $0.toDomain() }
         }
@@ -183,6 +225,8 @@ final class {Feature}ViewModel {
     var items: [{Entity}] = []
     var isLoading = false
     var errorMessage: String?
+    var searchText = ""
+    var showCompletedOnly = false
     var activeSheet: {Feature}SheetRoute?
 
     private let repository: {Entity}RepositoryProtocol
@@ -195,7 +239,12 @@ final class {Feature}ViewModel {
         isLoading = true
         defer { isLoading = false }
         do {
-            items = try await repository.fetchAll()
+            items = try await repository.fetch(
+                matching: {Entity}Filter(
+                    isCompleted: showCompletedOnly ? true : nil,
+                    searchText: searchText
+                )
+            )
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -224,15 +273,12 @@ import Foundation
 @MainActor
 final class {Entity}FormViewModel {
     var title = ""
-    var amount = ""
-    var date = Date.now
-    var category = ""
+    var details = ""
+    var isCompleted = false
     var isSaving = false
 
     var isValid: Bool {
-        !title.trimmingCharacters(in: .whitespaces).isEmpty &&
-        Decimal(string: amount) != nil &&
-        Decimal(string: amount)! > 0
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     private let repository: {Entity}RepositoryProtocol
@@ -247,9 +293,8 @@ final class {Entity}FormViewModel {
         self.editingItem = item
         if let item {
             title = item.title
-            amount = "\(item.amount)"
-            date = item.date
-            category = item.category
+            details = item.details
+            isCompleted = item.isCompleted
         }
     }
 
@@ -258,13 +303,14 @@ final class {Entity}FormViewModel {
         isSaving = true
         defer { isSaving = false }
 
+        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         let item = {Entity}(
             id: editingItem?.id ?? UUID().uuidString,
-            title: title.trimmingCharacters(in: .whitespaces),
-            amount: Decimal(string: amount)!,
-            date: date,
-            category: category,
-            createdAt: editingItem?.createdAt ?? .now
+            title: trimmedTitle,
+            details: details.trimmingCharacters(in: .whitespacesAndNewlines),
+            isCompleted: isCompleted,
+            createdAt: editingItem?.createdAt ?? .now,
+            updatedAt: .now
         )
 
         do {
@@ -286,22 +332,45 @@ struct {Feature}View: View {
     @State private var viewModel = {Feature}ViewModel()
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            ScrollView {
-                LazyVStack(spacing: 12) {
-                    ForEach(viewModel.items) { item in
-                        {Entity}Row(item: item)
-                            .onTapGesture { viewModel.presentEditSheet(for: item) }
+        NavigationStack {
+            ZStack(alignment: .bottomTrailing) {
+                VStack(spacing: Space.m) {
+                    Toggle("Show completed only", isOn: $viewModel.showCompletedOnly)
+                        .font(.dsCaption)
+                        .padding(.horizontal, Space.l)
+                        .onChange(of: viewModel.showCompletedOnly) {
+                            Task { await viewModel.loadItems() }
+                        }
+
+                    ScrollView {
+                        LazyVStack(spacing: Space.m) {
+                            ForEach(viewModel.items) { item in
+                                Button {
+                                    viewModel.presentEditSheet(for: item)
+                                } label: {
+                                    {Entity}Row(item: item)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal, Space.l)
                     }
                 }
-                .padding(.horizontal, 16)
-            }
 
-            {Prefix}GlassFAB {
-                viewModel.presentNewSheet()
+                {Prefix}GlassFAB {
+                    viewModel.presentNewSheet()
+                }
+                .padding(.trailing, Space.l)
+                .padding(.bottom, Space.l)
             }
-            .padding(.trailing, 16)
-            .padding(.bottom, 16)
+            .navigationTitle("{Feature}")
+        }
+        .searchable(text: $viewModel.searchText, prompt: "Filter by title or details")
+        .onChange(of: viewModel.searchText) {
+            Task { await viewModel.loadItems() }
+        }
+        .onSubmit(of: .search) {
+            Task { await viewModel.loadItems() }
         }
         .task { await viewModel.loadItems() }
         .sheet(item: $viewModel.activeSheet) { route in
@@ -322,9 +391,12 @@ struct {Entity}Sheet: View {
     }
 
     var body: some View {
+        @Bindable var viewModel = viewModel
         NavigationStack {
             Form {
-                // fields
+                {Prefix}TextField("Title", prompt: "Required", text: $viewModel.title)
+                {Prefix}TextField("Details", prompt: "Optional", text: $viewModel.details)
+                Toggle("Completed", isOn: $viewModel.isCompleted)
             }
             .navigationTitle(viewModel.isEditing ? "Edit" : "New")
             .navigationBarTitleDisplayMode(.inline)
@@ -351,21 +423,31 @@ struct {Entity}Row: View {
     let item: {Entity}
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(item.title).font(.uiLabel)
-                Text(item.category).font(.uiCaption)
-            }
-            Spacer()
-            Text(formatAmount(item.amount)).font(.dataBody(size: 16))
-        }
-        .padding(16)
-        .background(Color.appSurface)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
+        HStack(spacing: Space.m) {
+            VStack(alignment: .leading, spacing: Space.xs) {
+                Text(item.title)
+                    .font(.dsBody)
+                    .foregroundStyle(Color.textPrimary)
 
-    private func formatAmount(_ amount: Decimal) -> String {
-        amount.formatted(.currency(code: Locale.current.currency?.identifier ?? "USD"))
+                Text(item.details.isEmpty ? "No details" : item.details)
+                    .font(.dsCaption)
+                    .foregroundStyle(Color.textSecondary)
+                    .lineLimit(2)
+            }
+
+            Spacer()
+
+            Text(item.isCompleted ? "Completed" : "Open")
+                .font(.dsCaption)
+                .foregroundStyle(item.isCompleted ? Color.accentSuccess : Color.textSecondary)
+        }
+        .padding(Space.l)
+        .background(Color.appSurface)
+        .clipShape(.rect(cornerRadius: Radius.m))
+        .overlay(
+            RoundedRectangle(cornerRadius: Radius.m)
+                .stroke(Color.strokeSubtle, lineWidth: 1)
+        )
     }
 }
 ```

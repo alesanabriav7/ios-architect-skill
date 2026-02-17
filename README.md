@@ -1,6 +1,6 @@
 # ios-architect
 
-A reusable AI skill for scaffolding iOS apps and features following Clean Architecture with SwiftUI, GRDB, and Swift Concurrency.
+A reusable AI skill for scaffolding iOS apps and features following Clean Architecture with SwiftUI, GRDB, Swift Concurrency, and optional Apple Foundation Models integration.
 
 Works with **Claude Code**, **Codex**, and **Gemini**.
 
@@ -36,3 +36,11 @@ Tell your AI assistant:
 Or for a new feature in an existing project:
 
 > Use the ios-architect skill. I need a new Subscriptions feature with title, amount, billing cycle, and next billing date.
+
+For on-device AI integration:
+
+> Use the ios-architect skill. Add AI-generated insights to an existing feature with FoundationModels and a deterministic fallback.
+
+For iOS 26+ Liquid Glass adoption:
+
+> Use the ios-architect skill. Add Liquid Glass styling to key finance dashboard surfaces with iOS version-gated fallbacks for earlier versions.
