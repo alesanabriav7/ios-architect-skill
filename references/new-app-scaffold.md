@@ -30,6 +30,8 @@ Use this file when scaffolding a new app or adding new local packages.
 │   │   │   └── Presentation/ (optional)
 │   │   └── Core/
 │   │       └── Services/
+│   ├── Resources/
+│   │   └── Localizable.xcstrings
 │   └── Assets.xcassets/
 ├── {Prefix}Database/
 ├── {Prefix}DesignSystem/
@@ -88,4 +90,26 @@ struct {AppName}App: App {
 ## Root Navigation Baseline
 
 Prefer `TabView` at app root for top-level sections. Use `NavigationStack` inside features for hierarchical flows.
+If iPad/multi-column navigation is required, use `NavigationSplitView` at the root — see `references/navigation.md` for patterns and templates. `NavigationSplitView` auto-collapses to stack navigation on iPhone.
 If Liquid Glass is enabled, prefer native search/tab behavior first (`.searchable`, optional search tab role + `tabViewSearchActivation(_:)` on iOS 26+) and keep search/filter state scoped to the active tab.
+
+## iPad and Multi-Platform
+
+When targeting iPad or multiple Apple platforms:
+
+- Use `NavigationSplitView` for multi-column layouts on iPad/Mac (see `references/navigation.md`).
+- Use `#if os(iOS)` / `#if os(macOS)` for platform-specific code paths.
+- Use `@Environment(\.horizontalSizeClass)` to adjust content density between compact (iPhone) and regular (iPad) size classes:
+
+```swift
+@Environment(\.horizontalSizeClass) private var sizeClass
+
+var columns: [GridItem] {
+    sizeClass == .compact
+        ? [GridItem(.flexible())]
+        : [GridItem(.flexible()), GridItem(.flexible())]
+}
+```
+
+- Test with both compact and regular size classes in previews.
+- Keep navigation state in a shared `AppRouter` so it survives layout changes between split and stack modes.

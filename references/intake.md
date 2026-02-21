@@ -25,6 +25,8 @@ Then ask:
 - If Liquid Glass is enabled, should search use native `.searchable(...)` (default) or a custom in-content search field (exception)?
 - Are there TabView behavior changes (tab set, per-tab search/filter state, tab-level controls)?
 - What is the fallback behavior when AI is unavailable?
+- Does the app collect user data or use Required Reason APIs (UserDefaults, file timestamps, disk space)?
+- Is iPad or multi-column navigation required?
 
 ## Required Intake Fields
 
@@ -35,7 +37,7 @@ Capture this checklist in short form:
 - Ownership decision (feature-local by default, or cross-domain shared with explicit consumers)
 - User flow and screens
 - Domain entities and key fields
-- Data source (local DB, API, or both)
+- Data source (local DB only, remote API only, or both with offline-first sync)
 - Integration points (shared services, existing features, notifications)
 - Test scope (unit, integration, UI/snapshot)
 - UI style constraints (standard tokens only, or include Liquid Glass on iOS 26+)
@@ -43,6 +45,8 @@ Capture this checklist in short form:
 - AI mode (none, single-shot generation, or streaming)
 - AI fallback path (template/rules-based behavior)
 - Prompt input boundaries (what data is allowed to be sent to the model)
+- Privacy: data collection, Required Reason APIs, account deletion requirement
+- Navigation: iPad/multi-column layout required (NavigationSplitView) or iPhone-only (NavigationStack)
 
 If the request is underspecified, state safe defaults and continue.
 

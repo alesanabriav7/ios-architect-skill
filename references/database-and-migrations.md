@@ -86,6 +86,87 @@ migrator.registerMigration("v3") { db in
 }
 ```
 
+## Reactive Queries with ValueObservation
+
+`ValueObservation` provides live-updating queries that emit new values whenever the observed database region changes. This replaces manual `loadItems()` refresh patterns for list views.
+
+### ViewModel with ValueObservation
+
+```swift
+import Foundation
+import GRDB
+import Observation
+
+@Observable
+@MainActor
+final class {Feature}ViewModel {
+    var items: [{Entity}] = []
+    var errorState: AppError?
+    private var observationTask: Task<Void, Never>?
+
+    private let dbManager: DatabaseManager
+
+    init(dbManager: DatabaseManager = .shared) {
+        self.dbManager = dbManager
+    }
+
+    func startObserving() {
+        observationTask?.cancel()
+        observationTask = Task { [weak self] in
+            guard let self else { return }
+            let observation = ValueObservation.tracking { db in
+                try {Entity}Record
+                    .order(Column("updatedAt").desc)
+                    .fetchAll(db)
+                    .map { $0.toDomain() }
+            }
+
+            do {
+                for try await items in observation.values(in: dbManager.reader) {
+                    self.items = items
+                }
+            } catch {
+                if !Task.isCancelled {
+                    self.errorState = .persistence(error.localizedDescription)
+                }
+            }
+        }
+    }
+
+    func stopObserving() {
+        observationTask?.cancel()
+        observationTask = nil
+    }
+
+    deinit {
+        observationTask?.cancel()
+    }
+}
+```
+
+### View Integration
+
+```swift
+struct {Feature}View: View {
+    @State private var viewModel = {Feature}ViewModel()
+
+    var body: some View {
+        List(viewModel.items) { item in
+            {Entity}Row(item: item)
+        }
+        .task {
+            viewModel.startObserving()
+        }
+    }
+}
+```
+
+### When to Use ValueObservation
+
+- Use `ValueObservation` for list views and any screen that should reflect database changes in real time.
+- Use one-shot `fetch`/`fetchAll` for detail views or screens that load data once.
+- `ValueObservation` automatically coalesces rapid changes and delivers results on the main actor when used with `@MainActor` ViewModels.
+
 ### Seed data
 
 ```swift
