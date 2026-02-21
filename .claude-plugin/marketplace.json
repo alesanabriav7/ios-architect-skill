@@ -1,0 +1,29 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/claude-code/refs/heads/main/marketplace/marketplace.schema.json",
+  "name": "ios-architect",
+  "version": "1.0.0",
+  "owner": {
+    "name": "Alejandro Sanabria",
+    "email": "alesanabriav@gmail.com"
+  },
+  "metadata": {
+    "description": "iOS app scaffolding with Clean Architecture, SwiftUI, GRDB, and Swift Concurrency."
+  },
+  "plugins": [
+    {
+      "name": "ios-architect",
+      "description": "Scaffold modern iOS apps and features with Clean Architecture, MVVM, SwiftUI, GRDB, Swift Concurrency, and modular local packages.",
+      "repository": "https://github.com/alesanabriav7/ios-architect-skill",
+      "version": "1.0.0",
+      "author": {
+        "name": "Alejandro Sanabria",
+        "email": "alesanabriav@gmail.com"
+      },
+      "license": "MIT",
+      "category": "development",
+      "keywords": ["swift", "swiftui", "ios", "clean-architecture", "grdb", "mvvm", "scaffolding"],
+      "tags": ["swift", "swiftui", "ios", "clean-architecture", "grdb", "mvvm", "scaffolding"],
+      "source": "./"
+    }
+  ]
+}

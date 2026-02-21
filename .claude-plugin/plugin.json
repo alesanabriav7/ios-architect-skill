@@ -1,0 +1,13 @@
+{
+  "name": "ios-architect",
+  "version": "1.0.0",
+  "description": "Scaffold modern iOS apps and features with Clean Architecture, MVVM, SwiftUI, GRDB, Swift Concurrency, and modular local packages.",
+  "author": {
+    "name": "Alejandro Sanabria",
+    "email": "alesanabriav@gmail.com"
+  },
+  "repository": "https://github.com/alesanabriav7/ios-architect-skill",
+  "license": "MIT",
+  "keywords": ["swift", "swiftui", "ios", "clean-architecture", "grdb", "mvvm", "scaffolding"],
+  "skills": ["./ios-architect"]
+}

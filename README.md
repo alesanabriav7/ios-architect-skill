@@ -1,30 +1,66 @@
 # ios-architect
 
-A reusable AI skill for scaffolding iOS apps and features following Clean Architecture with SwiftUI, GRDB, Swift Concurrency, and optional Apple Foundation Models integration.
+A skill for scaffolding modern iOS apps and features with Clean Architecture, MVVM, SwiftUI, GRDB, Swift Concurrency, and modular local packages.
 
-Works with **Claude Code**, **Codex**, and **Gemini**.
+Built for **Claude Code**, **Codex**, and **Gemini**.
+
+## Who Is This For?
+
+iOS developers who want to scaffold new apps or features following strict Clean Architecture boundaries with feature-local ownership, GRDB persistence, and modern Swift APIs.
 
 ## Install
 
-### Claude Code
+### Option A — Skills CLI
 
 ```bash
-# Install as a folder so relative references resolve
-mkdir -p ~/.claude/skills/ios-architect
-ln -s ~/dev/ios-architect-skill/SKILL.md ~/.claude/skills/ios-architect/SKILL.md
-ln -s ~/dev/ios-architect-skill/references ~/.claude/skills/ios-architect/references
+npx skills add https://github.com/alesanabriav7/ios-architect-skill
 ```
 
-Or add to a project's `.claude/skills/` directory.
+### Option B — Claude Code Plugin Marketplace
 
-### Codex / Gemini
+```
+/plugin marketplace add ios-architect
+```
 
-Copy or symlink `SKILL.md` and `references/` into your skills directory. `SKILL.md` now loads only task-specific references for token efficiency.
+### Option C — Manual
 
-## Validate
+Clone the repo and symlink or copy the `ios-architect/` directory into your project's `.claude/skills/` folder:
 
 ```bash
-python3 /Users/ale/.codex/skills/.system/skill-creator/scripts/quick_validate.py .
+git clone https://github.com/alesanabriav7/ios-architect-skill.git
+cp -r ios-architect-skill/ios-architect .claude/skills/ios-architect
+```
+
+## What the Skill Offers
+
+- **New app scaffolding** — Tuist project, Clean Architecture layers, GRDB database, design system, and test targets
+- **Feature scaffolding** — Domain models, repository protocols/implementations, GRDB records, view models, SwiftUI views
+- **Database & migrations** — GRDB schema migrations with versioned migrators
+- **Design system** — Reusable SwiftUI components, color tokens, typography
+- **Networking** — URLSession-based API clients with async/await
+- **Navigation** — Coordinator pattern with deep linking support
+- **Testing** — Swift Testing, concurrency patterns, dependency injection
+- **Privacy & compliance** — Privacy manifests, required reason APIs
+- **Foundation Models** — On-device AI with deterministic fallback
+- **Liquid Glass** — iOS 26+ Liquid Glass styling with version-gated fallbacks
+
+## Skill Structure
+
+```
+ios-architect/
+├── SKILL.md
+└── references/
+    ├── intake.md
+    ├── new-app-scaffold.md
+    ├── feature-scaffold.md
+    ├── database-and-migrations.md
+    ├── design-system.md
+    ├── testing-concurrency-di.md
+    ├── networking.md
+    ├── navigation.md
+    ├── privacy-and-compliance.md
+    ├── foundation_models.md
+    └── liquid-glass.md
 ```
 
 ## Usage
@@ -33,14 +69,10 @@ Tell your AI assistant:
 
 > Use the ios-architect skill. I want to build a new app called BudgetTracker.
 
-Or for a new feature in an existing project:
-
 > Use the ios-architect skill. I need a new Subscriptions feature with title, amount, billing cycle, and next billing date.
 
-For on-device AI integration:
+> Use the ios-architect skill. Add Liquid Glass styling to the finance dashboard.
 
-> Use the ios-architect skill. Add AI-generated insights to an existing feature with FoundationModels and a deterministic fallback.
+## License
 
-For iOS 26+ Liquid Glass adoption:
-
-> Use the ios-architect skill. Add Liquid Glass styling to key finance dashboard surfaces with iOS version-gated fallbacks for earlier versions.
+[MIT](LICENSE)
