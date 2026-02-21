@@ -339,6 +339,29 @@ private extension Comparable {
 }
 ```
 
+## Localization
+
+- All user-facing strings must use `String(localized:)` (in Swift code) or `LocalizedStringKey` (in SwiftUI views). Never use raw string literals for text displayed to users.
+- Use String Catalogs (`.xcstrings`) as the default localization format for new projects. Xcode auto-extracts localizable strings during builds.
+- Never concatenate strings to form sentences — use string interpolation with localized keys to preserve word order across languages:
+
+```swift
+// Correct
+String(localized: "\(count) items remaining")
+
+// Wrong — breaks in RTL and reordering languages
+String(localized: "Items") + ": " + "\(count)"
+```
+
+- Pluralization: use String Catalogs' built-in plural rules (`.stringsdict` replacement). Define `zero`, `one`, `other` variants directly in the `.xcstrings` file.
+- RTL layout: test all screens with right-to-left languages (Arabic, Hebrew). Use `.leading`/`.trailing` instead of `.left`/`.right` for alignment. SwiftUI handles mirroring automatically when using standard layout APIs.
+- Format dates, numbers, and currencies with `FormatStyle` APIs — they respect the user's locale automatically:
+
+```swift
+Text(item.createdAt, format: .dateTime.month().day())
+Text(amount, format: .currency(code: currencyCode))
+```
+
 ## Accessibility and Content Rules
 
 - Tap targets: minimum 44x44 points.

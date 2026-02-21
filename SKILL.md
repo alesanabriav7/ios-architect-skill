@@ -17,6 +17,9 @@ Keep token usage low by loading only the references needed for the current reque
 `references/database-and-migrations.md`
 `references/design-system.md`
 `references/testing-concurrency-di.md`
+`references/privacy-and-compliance.md`
+Optional: `references/networking.md` when the app has API-backed features.
+Optional: `references/navigation.md` when deep linking or iPad/multi-column is required.
 Optional: `references/foundation_models.md` for on-device AI features.
 Optional: `references/liquid-glass.md` when iOS 26+ Liquid Glass styling is requested.
 - New feature:
@@ -24,11 +27,14 @@ Optional: `references/liquid-glass.md` when iOS 26+ Liquid Glass styling is requ
 If persistence changes: `references/database-and-migrations.md`
 If custom UI components: `references/design-system.md`
 If tests/concurrency concerns: `references/testing-concurrency-di.md`
+If API-backed: `references/networking.md`
+If navigation/deep linking changes: `references/navigation.md`
 If on-device AI generation/streaming is required: `references/foundation_models.md`.
 If Liquid Glass styling is required: `references/liquid-glass.md`.
 - New cross-domain shared service or shared model (for example Settings):
 `references/testing-concurrency-di.md`
 If DB-backed: `references/database-and-migrations.md`
+If API-backed: `references/networking.md`
 If the service uses Apple Foundation Models: `references/foundation_models.md`.
 - New design system component:
 `references/design-system.md`

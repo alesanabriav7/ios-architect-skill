@@ -196,6 +196,138 @@ final class {Entity}Repository: {Entity}RepositoryProtocol, Sendable {
 }
 ```
 
+## Error Handling
+
+### Typed Error Enum
+
+```swift
+import Foundation
+
+enum AppError: Error, Equatable, Sendable {
+    case network(NetworkError)
+    case persistence(String)
+    case validation(String)
+    case unexpected(String)
+
+    var userMessage: String {
+        switch self {
+        case .network(.noConnection):
+            return String(localized: "No internet connection. Please try again.")
+        case .network(.unauthorized):
+            return String(localized: "Session expired. Please sign in again.")
+        case .network(.serverError):
+            return String(localized: "Server error. Please try again later.")
+        case .network:
+            return String(localized: "A network error occurred.")
+        case .persistence:
+            return String(localized: "Failed to save or load data.")
+        case .validation(let message):
+            return message
+        case .unexpected:
+            return String(localized: "Something went wrong.")
+        }
+    }
+}
+```
+
+### User-Facing Error Presentation
+
+Bind an optional `AppError` to an `.alert` modifier:
+
+```swift
+@Observable
+@MainActor
+final class {Feature}ViewModel {
+    var errorState: AppError?
+
+    // ... other properties ...
+}
+```
+
+```swift
+struct {Feature}View: View {
+    @State private var viewModel = {Feature}ViewModel()
+
+    var body: some View {
+        content
+            .alert(
+                "Error",
+                isPresented: Binding(
+                    get: { viewModel.errorState != nil },
+                    set: { if !$0 { viewModel.errorState = nil } }
+                )
+            ) {
+                Button("OK") { viewModel.errorState = nil }
+                if viewModel.errorState.isRetryable {
+                    Button("Retry") { Task { await viewModel.retry() } }
+                }
+            } message: {
+                Text(viewModel.errorState?.userMessage ?? "")
+            }
+    }
+}
+```
+
+### Retryable Action Helper
+
+```swift
+extension AppError {
+    var isRetryable: Bool {
+        switch self {
+        case .network(.noConnection), .network(.serverError):
+            return true
+        default:
+            return false
+        }
+    }
+}
+```
+
+Store the last failed action in the ViewModel for retry:
+
+```swift
+@Observable
+@MainActor
+final class {Feature}ViewModel {
+    var errorState: AppError?
+    private var lastAction: (() async -> Void)?
+
+    func retry() async {
+        errorState = nil
+        await lastAction?()
+    }
+
+    func loadItems() async {
+        lastAction = { [weak self] in await self?.loadItems() }
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            items = try await repository.fetchAll()
+        } catch {
+            errorState = .unexpected(error.localizedDescription)
+        }
+    }
+}
+```
+
+### Structured Logging
+
+Use `os.Logger` for error logging with subsystem and category:
+
+```swift
+import os
+
+extension Logger {
+    static let {feature} = Logger(subsystem: Bundle.main.bundleIdentifier ?? "{AppName}", category: "{Feature}")
+}
+
+// Usage in catch blocks:
+catch {
+    Logger.{feature}.error("Failed to load items: \(error)")
+    errorState = .unexpected(error.localizedDescription)
+}
+```
+
 ## Presentation Templates
 
 ### Sheet Route
@@ -224,7 +356,7 @@ import Foundation
 final class {Feature}ViewModel {
     var items: [{Entity}] = []
     var isLoading = false
-    var errorMessage: String?
+    var errorState: AppError?
     var searchText = ""
     var showCompletedOnly = false
     var activeSheet: {Feature}SheetRoute?
@@ -246,7 +378,7 @@ final class {Feature}ViewModel {
                 )
             )
         } catch {
-            errorMessage = error.localizedDescription
+            errorState = .unexpected(error.localizedDescription)
         }
     }
 
@@ -255,7 +387,7 @@ final class {Feature}ViewModel {
             try await repository.delete(item)
             items.removeAll { $0.id == item.id }
         } catch {
-            errorMessage = error.localizedDescription
+            errorState = .unexpected(error.localizedDescription)
         }
     }
 
