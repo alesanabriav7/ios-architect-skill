@@ -2,7 +2,7 @@
 
 A skill for scaffolding modern iOS apps and features with Clean Architecture, MVVM, SwiftUI, GRDB, Swift Concurrency, and modular local packages.
 
-Built for **Claude Code**, **Codex**, and **Gemini**.
+Works with any LLM-powered coding agent.
 
 ## Who Is This For?
 
@@ -59,7 +59,7 @@ ios-architect/
     ├── networking.md
     ├── navigation.md
     ├── privacy-and-compliance.md
-    ├── foundation_models.md
+    ├── foundation-models.md
     └── liquid-glass.md
 ```
 
