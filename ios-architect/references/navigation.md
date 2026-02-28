@@ -13,6 +13,7 @@ import SwiftUI
 @MainActor
 final class AppRouter {
     var path = NavigationPath()
+    var activeSheet: AppSheet?
 
     func navigate(to route: AppRoute) {
         path.append(route)
@@ -25,6 +26,14 @@ final class AppRouter {
 
     func popToRoot() {
         path = NavigationPath()
+    }
+
+    func present(sheet: AppSheet) {
+        activeSheet = sheet
+    }
+
+    func dismissSheet() {
+        activeSheet = nil
     }
 }
 ```
@@ -147,7 +156,10 @@ final class TabRouter {
     }
 
     func router(for tab: AppTab) -> AppRouter {
-        routers[tab]!
+        guard let router = routers[tab] else {
+            fatalError("Router not found for tab \(tab). This is a programmer error.")
+        }
+        return router
     }
 }
 ```
@@ -211,28 +223,6 @@ enum AppSheet: Identifiable {
         }
     }
 }
-```
-
-Extend `AppRouter` with sheet state and presentation helpers:
-
-```swift
-extension AppRouter {
-    var activeSheet: AppSheet? {
-        get { _activeSheet }
-        set { _activeSheet = newValue }
-    }
-
-    func present(sheet: AppSheet) {
-        _activeSheet = sheet
-    }
-
-    func dismissSheet() {
-        _activeSheet = nil
-    }
-}
-
-// Add stored property in AppRouter class body:
-// var _activeSheet: AppSheet?
 ```
 
 Attach `.sheet(item:)` to the root view so modals are managed in one place:
