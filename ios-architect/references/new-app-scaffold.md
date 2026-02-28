@@ -112,7 +112,8 @@ Conditional dependencies — uncomment or add based on the data source mode chos
 |---|---|
 | Local (GRDB/SwiftData) | `.target(name: "{Prefix}Database")` |
 | Remote only | `.external(name: "SomeNetworkLib")` |
-| Hybrid (local + sync) | Both of the above |
+| Remote + cache (SWR) | `.external(name: "SomeNetworkLib")` -- no DB needed |
+| Hybrid (local + sync) | Both local DB and network |
 | Notifications | `.target(name: "{Prefix}Notifications")` |
 
 ## Tuist.swift Template

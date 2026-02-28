@@ -324,6 +324,252 @@ extension JSONDecoder {
 }
 ```
 
+## Response Cache (Stale-While-Revalidate)
+
+Recommended add-on for any API-backed feature. Provides instant first-load from a lightweight key-value cache, then silently refreshes from the network. **Do not use the database as a cache** -- GRDB is for structured, queryable, user-owned data. This cache is for ephemeral API responses only.
+
+Use when:
+- Read-heavy screens (feeds, profiles, settings, catalogs).
+- You want sub-second first paint without a full database layer.
+- The data is server-authoritative and the app never edits it locally.
+
+Do not use when:
+- The user creates or edits data offline -- use Offline-First with GRDB instead.
+- You need to query/filter/sort cached data -- use a database.
+
+### Cache Protocol (Domain)
+
+```swift
+import Foundation
+
+protocol ResponseCacheProtocol: Sendable {
+    func get<T: Codable & Sendable>(for key: String) async -> T?
+    func set<T: Codable & Sendable>(_ value: T, for key: String) async
+    func remove(for key: String) async
+    func removeAll() async
+}
+```
+
+### Cache Implementation (Data)
+
+Two-tier: in-memory dictionary for nanosecond reads, file-backed for persistence across app launches. Stored in `Caches/` so the OS can reclaim disk under storage pressure.
+
+```swift
+import Foundation
+import CryptoKit
+
+actor ResponseCache: ResponseCacheProtocol {
+    private struct Entry {
+        let data: Data
+        let storedAt: Date
+    }
+
+    private var memory: [String: Entry] = [:]
+    private let directory: URL
+    private let maxAge: Duration
+    private let maxMemoryEntries: Int
+    private let encoder = JSONEncoder()
+    private let decoder = JSONDecoder()
+
+    init(
+        namespace: String = "api",
+        maxAge: Duration = .seconds(300),
+        maxMemoryEntries: Int = 50
+    ) {
+        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        self.directory = caches.appendingPathComponent("ResponseCache/\(namespace)", isDirectory: true)
+        self.maxAge = maxAge
+        self.maxMemoryEntries = maxMemoryEntries
+        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    }
+
+    func get<T: Codable & Sendable>(for key: String) async -> T? {
+        let hash = hashedKey(key)
+
+        // Tier 1: in-memory (nanoseconds)
+        if let entry = memory[hash], !isExpired(entry) {
+            return try? decoder.decode(T.self, from: entry.data)
+        }
+
+        // Tier 2: disk (microseconds)
+        let file = directory.appendingPathComponent(hash)
+        guard let raw = try? Data(contentsOf: file) else {
+            memory[hash] = nil
+            return nil
+        }
+
+        // Disk entry layout: 8 bytes timestamp + payload
+        guard raw.count > 8 else { return nil }
+        let interval = raw.prefix(8).withUnsafeBytes { $0.load(as: Double.self) }
+        let storedAt = Date(timeIntervalSince1970: interval)
+        let payload = raw.dropFirst(8)
+
+        let entry = Entry(data: Data(payload), storedAt: storedAt)
+        guard !isExpired(entry) else {
+            try? FileManager.default.removeItem(at: file)
+            memory[hash] = nil
+            return nil
+        }
+
+        // Promote to memory for next read
+        memory[hash] = entry
+        return try? decoder.decode(T.self, from: entry.data)
+    }
+
+    func set<T: Codable & Sendable>(_ value: T, for key: String) async {
+        guard let payload = try? encoder.encode(value) else { return }
+        let now = Date.now
+        let hash = hashedKey(key)
+        let entry = Entry(data: payload, storedAt: now)
+
+        // Tier 1: write to memory
+        if memory.count >= maxMemoryEntries {
+            evictOldestMemoryEntry()
+        }
+        memory[hash] = entry
+
+        // Tier 2: write to disk (8-byte timestamp prefix + payload)
+        var diskData = Data(capacity: 8 + payload.count)
+        var interval = now.timeIntervalSince1970
+        diskData.append(Data(bytes: &interval, count: 8))
+        diskData.append(payload)
+        try? diskData.write(to: directory.appendingPathComponent(hash), options: .atomic)
+    }
+
+    func remove(for key: String) async {
+        let hash = hashedKey(key)
+        memory[hash] = nil
+        try? FileManager.default.removeItem(at: directory.appendingPathComponent(hash))
+    }
+
+    func removeAll() async {
+        memory.removeAll()
+        try? FileManager.default.removeItem(at: directory)
+        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    }
+
+    private func hashedKey(_ key: String) -> String {
+        SHA256.hash(data: Data(key.utf8))
+            .compactMap { String(format: "%02x", $0) }
+            .joined()
+    }
+
+    private func isExpired(_ entry: Entry) -> Bool {
+        Duration.seconds(Date.now.timeIntervalSince(entry.storedAt)) >= maxAge
+    }
+
+    private func evictOldestMemoryEntry() {
+        guard let oldest = memory.min(by: { $0.value.storedAt < $1.value.storedAt }) else { return }
+        memory[oldest.key] = nil
+    }
+}
+```
+
+### Cache Key Convention
+
+Build the key from the full request identity so different queries never collide:
+
+```swift
+extension APIRequest {
+    var cacheKey: String {
+        var parts = [method.rawValue, path]
+        if !queryItems.isEmpty {
+            let sorted = queryItems
+                .map { "\($0.name)=\($0.value ?? "")" }
+                .sorted()
+            parts.append(sorted.joined(separator: "&"))
+        }
+        return parts.joined(separator: ":")
+    }
+}
+```
+
+### Repository Integration
+
+The repository owns the cache-then-refresh flow. The ViewModel never knows about the cache.
+
+```swift
+final class {Entity}Repository: {Entity}RepositoryProtocol, Sendable {
+    private let api: APIClientProtocol
+    private let cache: ResponseCacheProtocol
+
+    init(api: APIClientProtocol, cache: ResponseCacheProtocol = ResponseCache()) {
+        self.api = api
+        self.cache = cache
+    }
+
+    func fetch(filter: {Entity}Filter?) async throws -> [{Entity}] {
+        let request = APIRequest(path: "/{entities}", queryItems: filter?.queryItems ?? [])
+
+        // 1. Return cached data if available
+        if let cached: [{Entity}] = await cache.get(for: request.cacheKey) {
+            return cached
+        }
+
+        // 2. No cache -- fetch from network
+        let items: [{Entity}] = try await api.send(request)
+        await cache.set(items, for: request.cacheKey)
+        return items
+    }
+
+    func refresh(filter: {Entity}Filter?) async throws -> [{Entity}] {
+        let request = APIRequest(path: "/{entities}", queryItems: filter?.queryItems ?? [])
+        let items: [{Entity}] = try await api.send(request)
+        await cache.set(items, for: request.cacheKey)
+        return items
+    }
+}
+```
+
+### ViewModel: Diff Before Emit
+
+Never replace the published array blindly -- diff against the current state so SwiftUI sees no change when the data is identical. This prevents flicker on refresh.
+
+```swift
+@Observable
+@MainActor
+final class {Entity}ListViewModel {
+    private(set) var items: [{Entity}] = []
+    private(set) var isLoading = false
+    private(set) var error: AppError?
+
+    private let repository: {Entity}RepositoryProtocol
+
+    init(repository: {Entity}RepositoryProtocol) {
+        self.repository = repository
+    }
+
+    func load() async {
+        isLoading = items.isEmpty  // only show spinner on cold start
+        do {
+            items = try await repository.fetch(filter: nil)
+            // Silent background refresh
+            if let fresh = try? await repository.refresh(filter: nil) {
+                applyIfChanged(fresh)
+            }
+        } catch {
+            self.error = .from(error)
+        }
+        isLoading = false
+    }
+
+    /// Replace items only when the content actually changed.
+    /// Equatable diff prevents SwiftUI from re-rendering identical lists.
+    private func applyIfChanged(_ new: [{Entity}]) {
+        guard items != new else { return }
+        items = new
+    }
+}
+```
+
+### Rules
+
+- **Database is not a cache.** GRDB stores user-owned, queryable, offline-editable data. `ResponseCache` stores throwaway API snapshots.
+- **Diff before emit.** Always compare old vs new before assigning to an `@Observable` property. SwiftUI will skip re-rendering when the value is unchanged, but only if you skip the assignment entirely.
+- **Show loading only on cold start.** When cache returns data, suppress the loading spinner. Show a subtle refresh indicator if needed, not a full skeleton.
+- **Invalidate on mutations.** After a POST/PUT/DELETE that changes server state, call `cache.remove(for:)` on the affected keys so the next read fetches fresh data.
+- **Let the OS evict.** Store in `Caches/` directory, not `Documents/`. The system reclaims this storage under pressure. Never treat cached data as durable.
+
 ## Offline-First Pattern
 
 Try local DB first, sync from network, reconcile. Use this when the feature must work without connectivity.

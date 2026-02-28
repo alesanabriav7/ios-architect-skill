@@ -40,7 +40,7 @@ Capture this checklist in short form:
 - Ownership decision (feature-local by default, or cross-domain shared with explicit consumers)
 - User flow and screens
 - Domain entities and key fields
-- Data source (local DB only, remote API only, or both with offline-first sync)
+- Data source (local DB only, remote API only, remote API + response cache, or both with offline-first sync)
 - Integration points (shared services, existing features, notifications)
 - Test scope (unit, integration, UI/snapshot)
 - UI style constraints (standard tokens only, or include Liquid Glass on iOS 26+)
