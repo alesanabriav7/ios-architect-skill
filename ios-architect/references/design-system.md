@@ -98,6 +98,20 @@ public enum Radius {
 public enum Motion {
     public static let quick = Animation.easeInOut(duration: 0.18)
     public static let standard = Animation.easeInOut(duration: 0.24)
+
+    /// Applies the given animation only when Reduce Motion is off.
+    /// All animation call sites must use this helper instead of
+    /// `withAnimation` directly to honor the user's motion preference.
+    public static func animate<Result>(
+        _ animation: Animation = .standard,
+        _ body: () throws -> Result
+    ) rethrows -> Result {
+        if UIAccessibility.isReduceMotionEnabled {
+            return try body()
+        } else {
+            return try withAnimation(animation, body)
+        }
+    }
 }
 ```
 
@@ -223,8 +237,8 @@ public struct {Prefix}TextField: View {
                     RoundedRectangle(cornerRadius: Radius.m)
                         .stroke(Color.strokeSubtle, lineWidth: 1)
                 )
+                .accessibilityLabel(title)
         }
-        .accessibilityElement(children: .combine)
     }
 }
 ```
@@ -384,7 +398,7 @@ Text(amount, format: .currency(code: currencyCode))
 - Use tokenized values: `Space.l` horizontal padding, `Space.m` row spacing.
 - Corners: `Radius.m` for compact controls, `Radius.l` for cards/surfaces.
 - Sheets: `.presentationDetents([.medium, .large])` + `.presentationDragIndicator(.visible)`.
-- Motion: use `Motion.quick` for micro transitions and `Motion.standard` for list/sheet state changes.
+- Motion: use `Motion.quick` for micro transitions and `Motion.standard` for list/sheet state changes. Always apply animations through `Motion.animate(_:_:)` instead of calling `withAnimation` directly — this ensures Reduce Motion is respected.
 
 ## Quality Gates
 

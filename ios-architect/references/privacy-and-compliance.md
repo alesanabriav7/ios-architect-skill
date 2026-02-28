@@ -94,6 +94,76 @@ func revokeAppleSignInToken(_ authorizationCode: String) async throws {
 
 - Test the full deletion flow end-to-end before submission.
 
+## App Tracking Transparency (ATT)
+
+Apps that track users across apps or websites owned by other companies must prompt with the ATT dialog. Tracking includes passing device-level identifiers (IDFA), email hashes, or similar data to ad networks or analytics brokers.
+
+### Info.plist Key
+
+Add the usage description to `Info.plist`:
+
+```xml
+<key>NSUserTrackingUsageDescription</key>
+<string>This identifier will be used to deliver personalized ads to you.</string>
+```
+
+Tailor the string to explain the specific value the user gets. Generic or vague descriptions cause App Review rejection.
+
+### Requesting Authorization
+
+```swift
+import AppTrackingTransparency
+
+func requestTrackingPermission() async -> ATTrackingManager.AuthorizationStatus {
+    await ATTrackingManager.requestTrackingAuthorization()
+}
+```
+
+Handle every possible status:
+
+```swift
+import AdSupport
+
+func configureTracking() async {
+    let status = await requestTrackingPermission()
+
+    switch status {
+    case .authorized:
+        let idfa = ASIdentifierManager.shared().advertisingIdentifier
+        // Pass IDFA to ad SDKs.
+        enableAdTracking(idfa: idfa)
+    case .denied, .restricted:
+        disableAdTracking()
+    case .notDetermined:
+        // Should not happen after the prompt returns, but handle defensively.
+        disableAdTracking()
+    @unknown default:
+        disableAdTracking()
+    }
+}
+```
+
+### When to Set `NSPrivacyTracking` to `true`
+
+In `PrivacyInfo.xcprivacy`, set `NSPrivacyTracking` to `true` **only** when the app actually tracks users as defined by Apple — sharing device or user data with third parties for advertising or measurement across different companies' apps/websites. If the app collects analytics solely for its own first-party use, leave it `false`.
+
+When `NSPrivacyTracking` is `true`, also populate `NSPrivacyTrackingDomains` with every domain the app contacts for tracking purposes:
+
+```xml
+<key>NSPrivacyTracking</key>
+<true/>
+<key>NSPrivacyTrackingDomains</key>
+<array>
+    <string>analytics.example.com</string>
+</array>
+```
+
+### Prompt Placement
+
+- Present the ATT prompt **after onboarding**, once the user understands the app's value. Showing it on cold launch leads to higher denial rates and a worse user experience.
+- The system prompt can only be shown once per install. If the user dismisses or denies it, direct them to **Settings > Privacy & Security > Tracking** to change the preference.
+- Gate tracking SDK initialization on the authorization result — do not fire tracking calls before the user responds.
+
 ## Third-Party SDK Privacy Manifests
 
 Every third-party SDK must ship its own `PrivacyInfo.xcprivacy` declaring the Required Reason APIs it uses.
@@ -112,3 +182,4 @@ Every third-party SDK must ship its own `PrivacyInfo.xcprivacy` declaring the Re
 - [ ] Third-party SDK privacy manifests included (run **Generate Privacy Report**).
 - [ ] SDK signatures verified (XCFramework signed, SPM packages with valid signature).
 - [ ] Account deletion flow tested end-to-end (if account creation exists).
+- [ ] ATT prompt implemented after onboarding with all statuses handled (if app tracks users).

@@ -9,7 +9,14 @@ import Foundation
 import GRDB
 
 public final class DatabaseManager: Sendable {
-    public static var shared: DatabaseManager!
+    private(set) static var shared: DatabaseManager?
+
+    public static func resolveShared() throws -> DatabaseManager {
+        guard let shared else {
+            throw DatabaseError(message: "DatabaseManager not initialized. Call makeShared() first.")
+        }
+        return shared
+    }
 
     public let writer: any DatabaseWriter
     public let reader: any DatabaseReader
@@ -106,7 +113,7 @@ final class {Feature}ViewModel {
 
     private let dbManager: DatabaseManager
 
-    init(dbManager: DatabaseManager = .shared) {
+    init(dbManager: DatabaseManager) {
         self.dbManager = dbManager
     }
 
@@ -148,7 +155,11 @@ final class {Feature}ViewModel {
 
 ```swift
 struct {Feature}View: View {
-    @State private var viewModel = {Feature}ViewModel()
+    @State private var viewModel: {Feature}ViewModel
+
+    init(dbManager: DatabaseManager) {
+        self._viewModel = State(initialValue: {Feature}ViewModel(dbManager: dbManager))
+    }
 
     var body: some View {
         List(viewModel.items) { item in
