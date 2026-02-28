@@ -65,6 +65,48 @@ struct {Entity}: Identifiable, Codable, Sendable, Equatable, Hashable {
 }
 ```
 
+### Preview Fixture Protocol
+
+Every domain model conforms to `PreviewFixture` so routes, previews, and the screenshot harness can construct screens without live app state. Use deterministic, stable values (fixed IDs, fixed dates) so snapshot tests produce consistent output.
+
+```swift
+import Foundation
+
+protocol PreviewFixture {
+    static var fixture: Self { get }
+    static var fixtures: [Self] { get }
+}
+
+extension {Entity}: PreviewFixture {
+    static var fixture: {Entity} {
+        {Entity}(
+            id: "fixture-1",
+            title: "Sample {Entity}",
+            details: "Fixture details for previews and testing",
+            isCompleted: false,
+            createdAt: Date(timeIntervalSince1970: 1_700_000_000),
+            updatedAt: Date(timeIntervalSince1970: 1_700_000_000)
+        )
+    }
+
+    static var fixtures: [{Entity}] {
+        [
+            .fixture,
+            {Entity}(
+                id: "fixture-2",
+                title: "Completed {Entity}",
+                details: "A completed fixture item",
+                isCompleted: true,
+                createdAt: Date(timeIntervalSince1970: 1_700_000_000),
+                updatedAt: Date(timeIntervalSince1970: 1_700_100_000)
+            ),
+        ]
+    }
+}
+```
+
+Fixtures differ from `make{Entity}()` test factories (see `testing-concurrency-di.md`): fixtures are **stable across runs** (fixed IDs, fixed dates) for deterministic screenshots, while factories generate **unique instances** for isolated unit tests.
+
 ### Repository Interface
 
 ```swift
