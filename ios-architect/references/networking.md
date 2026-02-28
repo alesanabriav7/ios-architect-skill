@@ -82,6 +82,31 @@ final class URLSessionAPIClient: APIClientProtocol, Sendable {
     }
 
     private func perform(_ request: APIRequest) async throws(NetworkError) -> (Data, HTTPURLResponse) {
+        let (data, httpResponse) = try await executeRequest(request)
+
+        // 401-retry: refresh token and retry once
+        if httpResponse.statusCode == 401, let tokenProvider {
+            let newToken = try await tokenProvider.refreshToken()
+            var retryRequest = try buildURLRequest(from: request)
+            retryRequest.setValue("Bearer \(newToken)", forHTTPHeaderField: "Authorization")
+
+            let retryData: Data
+            let retryResponse: URLResponse
+            do {
+                (retryData, retryResponse) = try await session.data(for: retryRequest)
+            } catch {
+                throw .noConnection
+            }
+            guard let retryHTTP = retryResponse as? HTTPURLResponse else {
+                throw .unexpected(nil)
+            }
+            return (retryData, retryHTTP)
+        }
+
+        return (data, httpResponse)
+    }
+
+    private func executeRequest(_ request: APIRequest) async throws(NetworkError) -> (Data, HTTPURLResponse) {
         var urlRequest = try buildURLRequest(from: request)
 
         if let tokenProvider {
@@ -146,6 +171,15 @@ enum NetworkError: Error, Sendable, Equatable {
     case noConnection
     case decodingFailed(String)
     case unexpected(String?)
+
+    var isRetryable: Bool {
+        switch self {
+        case .serverError, .noConnection:
+            return true
+        default:
+            return false
+        }
+    }
 }
 ```
 
@@ -169,10 +203,20 @@ import Security
 actor KeychainTokenProvider: TokenProviderProtocol {
     private let service: String
     private let account: String
+    private let session: URLSession
+    private let refreshURL: URL
+    private var currentRefreshTask: Task<String, Error>?
 
-    init(service: String = Bundle.main.bundleIdentifier ?? "app", account: String = "auth_token") {
+    init(
+        service: String = Bundle.main.bundleIdentifier ?? "app",
+        account: String = "auth_token",
+        session: URLSession = .shared,
+        refreshURL: URL
+    ) {
         self.service = service
         self.account = account
+        self.session = session
+        self.refreshURL = refreshURL
     }
 
     func currentToken() async throws(NetworkError) -> String {
@@ -183,9 +227,54 @@ actor KeychainTokenProvider: TokenProviderProtocol {
     }
 
     func refreshToken() async throws(NetworkError) -> String {
-        // Call your auth endpoint to get a fresh token.
-        // Store the new token in Keychain and return it.
-        fatalError("Implement refresh logic against your auth API")
+        // Dedup concurrent refresh calls by reusing an in-flight task
+        if let existing = currentRefreshTask {
+            do {
+                return try await existing.value
+            } catch let error as NetworkError {
+                throw error
+            } catch {
+                throw .unexpected(error.localizedDescription)
+            }
+        }
+
+        let task = Task<String, Error> { [session, refreshURL] in
+            guard let currentRefresh = readFromKeychain() else {
+                throw NetworkError.unauthorized
+            }
+
+            var request = URLRequest(url: refreshURL)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try JSONEncoder().encode(["refresh_token": currentRefresh])
+
+            let (data, response) = try await session.data(for: request)
+
+            guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+                throw NetworkError.unauthorized
+            }
+
+            struct TokenResponse: Decodable { let accessToken: String }
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            let tokenResponse = try decoder.decode(TokenResponse.self, from: data)
+            return tokenResponse.accessToken
+        }
+
+        currentRefreshTask = task
+
+        do {
+            let newToken = try await task.value
+            currentRefreshTask = nil
+            saveToKeychain(newToken)
+            return newToken
+        } catch let error as NetworkError {
+            currentRefreshTask = nil
+            throw error
+        } catch {
+            currentRefreshTask = nil
+            throw .unexpected(error.localizedDescription)
+        }
     }
 
     private func readFromKeychain() -> String? {
@@ -262,6 +351,7 @@ Wrap unreliable network calls with bounded retry logic.
 func withRetry<T: Sendable>(
     maxAttempts: Int = 3,
     initialDelay: Duration = .seconds(1),
+    shouldRetry: @Sendable (Error) -> Bool = { ($0 as? NetworkError)?.isRetryable == true },
     operation: @Sendable () async throws -> T
 ) async throws -> T {
     var delay = initialDelay
@@ -269,12 +359,13 @@ func withRetry<T: Sendable>(
         do {
             return try await operation()
         } catch {
-            if attempt == maxAttempts { throw error }
+            guard attempt < maxAttempts, shouldRetry(error) else { throw error }
             try await Task.sleep(for: delay)
             delay *= 2
         }
     }
-    fatalError("Unreachable")
+    // All attempts exhausted; the final error is thrown inside the loop.
+    throw NetworkError.unexpected("Retry loop exited unexpectedly")
 }
 ```
 

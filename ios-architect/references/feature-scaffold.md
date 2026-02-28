@@ -83,6 +83,7 @@ struct {Entity}Filter: Sendable, Equatable {
 protocol {Entity}RepositoryProtocol: Sendable {
     func save(_ item: {Entity}) async throws
     func delete(_ item: {Entity}) async throws
+    func fetchByID(_ id: String) async throws -> {Entity}?
     func fetchAll() async throws -> [{Entity}]
     func fetch(matching filter: {Entity}Filter) async throws -> [{Entity}]
 }
@@ -361,7 +362,7 @@ final class {Feature}ViewModel {
     var showCompletedOnly = false
     var activeSheet: {Feature}SheetRoute?
 
-    private let repository: {Entity}RepositoryProtocol
+    let repository: {Entity}RepositoryProtocol
 
     init(repository: {Entity}RepositoryProtocol = {Entity}Repository()) {
         self.repository = repository
@@ -408,6 +409,7 @@ final class {Entity}FormViewModel {
     var details = ""
     var isCompleted = false
     var isSaving = false
+    var errorMessage: String?
 
     var isValid: Bool {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -430,8 +432,8 @@ final class {Entity}FormViewModel {
         }
     }
 
-    func save() async -> Bool {
-        guard isValid else { return false }
+    func save() async throws {
+        guard isValid else { throw AppError.validation("Title is required.") }
         isSaving = true
         defer { isSaving = false }
 
@@ -447,10 +449,80 @@ final class {Entity}FormViewModel {
 
         do {
             try await repository.save(item)
-            return true
         } catch {
-            return false
+            let appError = (error as? AppError) ?? .unexpected(error.localizedDescription)
+            errorMessage = appError.userMessage
+            throw appError
         }
+    }
+}
+```
+
+### Detail ViewModel
+
+```swift
+import Foundation
+
+@Observable
+@MainActor
+final class {Entity}DetailViewModel {
+    var item: {Entity}?
+    var isLoading = false
+    var errorMessage: String?
+
+    private let repository: {Entity}RepositoryProtocol
+    private let itemID: String
+
+    init(repository: {Entity}RepositoryProtocol, itemID: String) {
+        self.repository = repository
+        self.itemID = itemID
+    }
+
+    func load() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            item = try await repository.fetchByID(itemID)
+        } catch {
+            let appError = (error as? AppError) ?? .unexpected(error.localizedDescription)
+            errorMessage = appError.userMessage
+        }
+    }
+}
+```
+
+### Detail View
+
+```swift
+import SwiftUI
+
+struct {Entity}DetailView: View {
+    @State private var viewModel: {Entity}DetailViewModel
+
+    init(repository: {Entity}RepositoryProtocol, itemID: String) {
+        _viewModel = State(initialValue: {Entity}DetailViewModel(repository: repository, itemID: itemID))
+    }
+
+    var body: some View {
+        Group {
+            if viewModel.isLoading {
+                ProgressView()
+            } else if let item = viewModel.item {
+                List {
+                    Section("Details") {
+                        LabeledContent("Title", value: item.title)
+                        LabeledContent("Details", value: item.details.isEmpty ? "None" : item.details)
+                        LabeledContent("Status", value: item.isCompleted ? "Completed" : "Open")
+                    }
+                }
+            } else if let errorMessage = viewModel.errorMessage {
+                ContentUnavailableView("Error", systemImage: "exclamationmark.triangle", description: Text(errorMessage))
+            } else {
+                ContentUnavailableView("Not Found", systemImage: "doc.questionmark", description: Text("This item could not be found."))
+            }
+        }
+        .navigationTitle(viewModel.item?.title ?? "{Entity}")
+        .task { await viewModel.load() }
     }
 }
 ```
@@ -477,9 +549,7 @@ struct {Feature}View: View {
                     ScrollView {
                         LazyVStack(spacing: Space.m) {
                             ForEach(viewModel.items) { item in
-                                Button {
-                                    viewModel.presentEditSheet(for: item)
-                                } label: {
+                                NavigationLink(value: item) {
                                     {Entity}Row(item: item)
                                 }
                                 .buttonStyle(.plain)
@@ -495,6 +565,9 @@ struct {Feature}View: View {
                 .padding(.trailing, Space.l)
                 .padding(.bottom, Space.l)
             }
+            .navigationDestination(for: {Entity}.self) { item in
+                {Entity}DetailView(repository: viewModel.repository, itemID: item.id)
+            }
             .navigationTitle("{Feature}")
         }
         .searchable(text: $viewModel.searchText, prompt: "Filter by title or details")
@@ -507,8 +580,8 @@ struct {Feature}View: View {
         .task { await viewModel.loadItems() }
         .sheet(item: $viewModel.activeSheet) { route in
             switch route {
-            case .new: {Entity}Sheet()
-            case .edit(let item): {Entity}Sheet(editing: item)
+            case .new: {Entity}Sheet(repository: viewModel.repository)
+            case .edit(let item): {Entity}Sheet(repository: viewModel.repository, editing: item)
             }
         }
     }
@@ -518,8 +591,8 @@ struct {Entity}Sheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel: {Entity}FormViewModel
 
-    init(editing item: {Entity}? = nil) {
-        _viewModel = State(initialValue: {Entity}FormViewModel(editing: item))
+    init(repository: {Entity}RepositoryProtocol, editing item: {Entity}? = nil) {
+        _viewModel = State(initialValue: {Entity}FormViewModel(repository: repository, editing: item))
     }
 
     var body: some View {
@@ -539,12 +612,25 @@ struct {Entity}Sheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         Task {
-                            if await viewModel.save() { dismiss() }
+                            do {
+                                try await viewModel.save()
+                                dismiss()
+                            } catch {
+                                // Error already surfaced via viewModel.errorMessage
+                            }
                         }
                     }
                     .disabled(!viewModel.isValid || viewModel.isSaving)
                 }
             }
+        }
+        .alert("Error", isPresented: Binding(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.errorMessage = nil } }
+        )) {
+            Button("OK") { viewModel.errorMessage = nil }
+        } message: {
+            Text(viewModel.errorMessage ?? "")
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)

@@ -27,12 +27,15 @@ Then ask:
 - What is the fallback behavior when AI is unavailable?
 - Does the app collect user data or use Required Reason APIs (UserDefaults, file timestamps, disk space)?
 - Is iPad or multi-column navigation required?
+- What is the authentication model (none / required / optional)?
+- If fetching lists from a remote API, what pagination strategy is used (cursor / offset / full fetch)?
 
 ## Required Intake Fields
 
 Capture this checklist in short form:
 
 - Build type
+- Minimum deployment target
 - Target path/module
 - Ownership decision (feature-local by default, or cross-domain shared with explicit consumers)
 - User flow and screens

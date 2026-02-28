@@ -13,6 +13,7 @@ import SwiftUI
 @MainActor
 final class AppRouter {
     var path = NavigationPath()
+    var activeSheet: AppSheet?
 
     func navigate(to route: AppRoute) {
         path.append(route)
@@ -25,6 +26,14 @@ final class AppRouter {
 
     func popToRoot() {
         path = NavigationPath()
+    }
+
+    func present(sheet: AppSheet) {
+        activeSheet = sheet
+    }
+
+    func dismissSheet() {
+        activeSheet = nil
     }
 }
 ```
@@ -117,6 +126,134 @@ ContentView()
 
 // In any child view:
 @Environment(\.router) private var router
+```
+
+## TabView with Per-Tab Router
+
+Use a `TabView` when the app has distinct top-level sections. Each tab gets its own `AppRouter` instance so push/pop state is independent across tabs.
+
+```swift
+enum AppTab: String, CaseIterable, Identifiable {
+    case {feature}
+    case search
+    case settings
+
+    var id: String { rawValue }
+    var title: String { /* ... */ }
+    var icon: String { /* ... */ }
+}
+
+@Observable
+@MainActor
+final class TabRouter {
+    var selectedTab: AppTab = .{feature}
+    private(set) var routers: [AppTab: AppRouter] = [:]
+
+    init() {
+        for tab in AppTab.allCases {
+            routers[tab] = AppRouter()
+        }
+    }
+
+    func router(for tab: AppTab) -> AppRouter {
+        guard let router = routers[tab] else {
+            fatalError("Router not found for tab \(tab). This is a programmer error.")
+        }
+        return router
+    }
+}
+```
+
+Wire the root `TabView` so each tab owns a `NavigationStack` bound to its dedicated router:
+
+```swift
+struct TabRootView: View {
+    @State private var tabRouter = TabRouter()
+
+    var body: some View {
+        TabView(selection: $tabRouter.selectedTab) {
+            ForEach(AppTab.allCases) { tab in
+                let router = tabRouter.router(for: tab)
+                NavigationStack(path: Binding(
+                    get: { router.path },
+                    set: { router.path = $0 }
+                )) {
+                    tab.rootView
+                        .navigationDestination(for: AppRoute.self) { route in
+                            route.destinationView
+                        }
+                }
+                .tabItem {
+                    Label(tab.title, systemImage: tab.icon)
+                }
+                .tag(tab)
+                .environment(\.router, router)
+            }
+        }
+    }
+}
+
+extension AppTab {
+    @MainActor @ViewBuilder
+    var rootView: some View {
+        switch self {
+        case .{feature}: {Feature}ListView()
+        case .search: SearchView()
+        case .settings: SettingsView()
+        }
+    }
+}
+```
+
+## Modal and Sheet Presentation
+
+Model sheets as a dedicated enum on `AppRouter`. Use an optional `@Published` property so SwiftUI can drive `.sheet(item:)` automatically.
+
+```swift
+enum AppSheet: Identifiable {
+    case {feature}Create
+    case {feature}Edit({Entity})
+
+    var id: String {
+        switch self {
+        case .{feature}Create:
+            return "{feature}Create"
+        case .{feature}Edit(let item):
+            return "{feature}Edit-\(item.id)"
+        }
+    }
+}
+```
+
+Attach `.sheet(item:)` to the root view so modals are managed in one place:
+
+```swift
+NavigationStack(path: $router.path) {
+    {Feature}ListView()
+        .navigationDestination(for: AppRoute.self) { route in
+            route.destinationView
+        }
+}
+.sheet(item: $router.activeSheet) { sheet in
+    NavigationStack {
+        switch sheet {
+        case .{feature}Create:
+            {Feature}CreateView()
+        case .{feature}Edit(let item):
+            {Feature}EditView(item: item)
+        }
+    }
+}
+```
+
+Trigger presentation from any child view through the environment-injected router:
+
+```swift
+@Environment(\.router) private var router
+
+Button("New {Feature}") {
+    router.present(sheet: .{feature}Create)
+}
 ```
 
 ## Deep Linking: URL to Route Parsing

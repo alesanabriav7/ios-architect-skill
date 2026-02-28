@@ -64,6 +64,68 @@ Ownership rule:
 8. Optional: if MVP includes on-device AI, scaffold AI contracts and fallback services (see `references/foundation_models.md`).
 9. Optional: if MVP includes Liquid Glass, scaffold shared glass components plus iOS 26+ fallback styling (see `references/liquid-glass.md`).
 
+## Project.swift Template
+
+```swift
+import ProjectDescription
+
+let project = Project(
+    name: "{AppName}",
+    settings: .settings(
+        base: ["SWIFT_VERSION": "6.0"],
+        defaultSettings: .recommended
+    ),
+    targets: [
+        .target(
+            name: "{AppName}",
+            destinations: .iOS,
+            product: .app,
+            bundleId: "com.{organization}.{appname}",
+            deploymentTargets: .iOS("18.0"),
+            sources: ["{AppName}/**"],
+            resources: ["{AppName}/Resources/**", "{AppName}/Assets.xcassets/**"],
+            dependencies: [
+                .target(name: "{Prefix}DesignSystem"),
+                .target(name: "{Prefix}SharedComponents"),
+                // Include database dependency only when using local persistence
+                // .target(name: "{Prefix}Database"),
+            ]
+        ),
+        .target(
+            name: "{AppName}Tests",
+            destinations: .iOS,
+            product: .unitTests,
+            bundleId: "com.{organization}.{appname}.tests",
+            deploymentTargets: .iOS("18.0"),
+            sources: ["{AppName}Tests/**"],
+            dependencies: [
+                .target(name: "{AppName}"),
+            ]
+        ),
+    ]
+)
+```
+
+Conditional dependencies — uncomment or add based on the data source mode chosen for the project:
+
+| Data Source Mode | Dependency |
+|---|---|
+| Local (GRDB/SwiftData) | `.target(name: "{Prefix}Database")` |
+| Remote only | `.external(name: "SomeNetworkLib")` |
+| Hybrid (local + sync) | Both of the above |
+| Notifications | `.target(name: "{Prefix}Notifications")` |
+
+## Tuist.swift Template
+
+```swift
+import ProjectDescription
+
+let tuist = Tuist(
+    compatibleXcodeVersions: .upToNextMajor("16.0"),
+    swiftVersion: "6.0"
+)
+```
+
 ## App Entry Template
 
 ```swift
