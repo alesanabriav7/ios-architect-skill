@@ -61,7 +61,7 @@ Ownership rule:
 5. Shared cross-domain modules only when reused by at least two features (for example `Settings`).
 6. Tests for service and view-model behavior.
 7. Asset catalogs and design tokens.
-8. Optional: if MVP includes on-device AI, scaffold AI contracts and fallback services (see `references/foundation_models.md`).
+8. Optional: if MVP includes on-device AI, scaffold AI contracts and fallback services (see `references/foundation-models.md`).
 9. Optional: if MVP includes Liquid Glass, scaffold shared glass components plus iOS 26+ fallback styling (see `references/liquid-glass.md`).
 
 ## Project.swift Template

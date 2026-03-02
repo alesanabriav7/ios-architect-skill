@@ -9,13 +9,20 @@ import Foundation
 import GRDB
 
 public final class DatabaseManager: Sendable {
-    private(set) static var shared: DatabaseManager?
+    private static var sharedInstance: DatabaseManager?
+
+    public static var shared: DatabaseManager {
+        guard let sharedInstance else {
+            fatalError("DatabaseManager not initialized. Call makeShared() first.")
+        }
+        return sharedInstance
+    }
 
     public static func resolveShared() throws -> DatabaseManager {
-        guard let shared else {
+        guard let sharedInstance else {
             throw DatabaseError(message: "DatabaseManager not initialized. Call makeShared() first.")
         }
-        return shared
+        return sharedInstance
     }
 
     public let writer: any DatabaseWriter
@@ -28,11 +35,11 @@ public final class DatabaseManager: Sendable {
 
     @MainActor
     public static func makeShared() throws {
-        if shared != nil { return }
+        if sharedInstance != nil { return }
         let path = URL.documentsDirectory.appending(path: "{app_name}.sqlite").path()
         let dbPool = try DatabasePool(path: path)
         try runMigrations(on: dbPool)
-        shared = DatabaseManager(writer: dbPool)
+        sharedInstance = DatabaseManager(writer: dbPool)
     }
 
     private static func runMigrations(on db: DatabasePool) throws {
@@ -76,7 +83,7 @@ extension DatabaseManager {
 ### Add column
 
 ```swift
-migrator.registerMigration("v2") { db in
+migrator.registerMigration("v{next}") { db in
     try db.alter(table: "{table}") { t in
         t.add(column: "newField", .text).defaults(to: "")
     }
@@ -86,12 +93,120 @@ migrator.registerMigration("v2") { db in
 ### Create table
 
 ```swift
-migrator.registerMigration("v3") { db in
+migrator.registerMigration("v{next}") { db in
     try db.create(table: "new_table") { t in
         t.primaryKey("id", .text).notNull()
     }
 }
 ```
+
+### Add index (recommended for aggregate/filter paths)
+
+```swift
+migrator.registerMigration("v{next}") { db in
+    try db.create(index: "idx_entry_bucketID_date", on: "entry", columns: ["bucketID", "date"])
+}
+```
+
+## Query Performance Rules (Prevent N+1)
+
+- Never run `fetchOne`, `fetchAll`, or ad-hoc SQL inside Swift loops (`for`, `map`, `forEach`) over previously fetched records.
+- For grouped totals and metrics, compute in SQL with `GROUP BY`, `SUM`, `COUNT`, `AVG`, `MIN`, `MAX` and fetch projection rows.
+- Prefer one query for aggregate screens. Association prefetch flows may use two queries (`including(required:)` / `including(all:)`), but not one query per parent row.
+- If child/related data is needed, use joins or GRDB associations in the main request, never per-row relation fetches.
+- Keep mappers pure (`row -> domain`) with no extra database calls.
+- Add indexes on join/filter/order columns used by hot aggregate paths (for example `bucketID`, date columns, and sort keys).
+- For aggregate endpoints, select only required projected columns instead of `SELECT *`.
+
+### Anti-Pattern (N+1)
+
+```swift
+let buckets = try BucketRecord.fetchAll(db)
+
+return try buckets.map { bucket in
+    let total = try Int.fetchOne(
+        db,
+        sql: "SELECT COALESCE(SUM(amount), 0) FROM entry WHERE bucketID = ?",
+        arguments: [bucket.id]
+    ) ?? 0
+
+    return BucketTotal(bucketID: bucket.id, name: bucket.name, totalAmount: total)
+}
+```
+
+### Preferred Pattern: Aggregate in One Query
+
+```swift
+import Foundation
+import GRDB
+
+struct BucketTotalRow: FetchableRecord, Decodable, Sendable {
+    let bucketID: String
+    let bucketName: String
+    let totalAmount: Int64
+}
+
+func fetchAll(for range: DateInterval) async throws -> [BucketTotal] {
+    try await dbManager.reader.read { db in
+        let rows = try BucketTotalRow.fetchAll(
+            db,
+            sql: """
+            SELECT b.id AS bucketID,
+                   b.name AS bucketName,
+                   COALESCE(SUM(e.amount), 0) AS totalAmount
+            FROM bucket b
+            LEFT JOIN entry e
+                ON e.bucketID = b.id
+               AND e.date >= ?
+               AND e.date < ?
+            GROUP BY b.id, b.name
+            ORDER BY totalAmount DESC, b.name ASC
+            """,
+            arguments: [range.start, range.end]
+        )
+
+        return rows.map {
+            BucketTotal(
+                bucketID: $0.bucketID,
+                name: $0.bucketName,
+                totalAmount: Int($0.totalAmount)
+            )
+        }
+    }
+}
+```
+
+### ValueObservation for Aggregates
+
+Use the same single-query approach inside `ValueObservation.tracking`:
+
+```swift
+let observation = ValueObservation.tracking { db in
+    try BucketTotalRow.fetchAll(
+        db,
+        sql: """
+        SELECT b.id AS bucketID,
+               b.name AS bucketName,
+               COALESCE(SUM(e.amount), 0) AS totalAmount
+        FROM bucket b
+        LEFT JOIN entry e
+            ON e.bucketID = b.id
+           AND e.date >= ?
+           AND e.date < ?
+        GROUP BY b.id, b.name
+        ORDER BY totalAmount DESC, b.name ASC
+        """,
+        arguments: [range.start, range.end]
+    )
+}
+```
+
+### Generated Code Review Checklist
+
+- `fetchAll(for:)` methods should have exactly one read query for summaries (or one request with GRDB associations).
+- No database access in per-item mapping or loops.
+- Aggregates are computed by SQL, not Swift iteration.
+- Query has deterministic ordering when returned to UI.
 
 ## Reactive Queries with ValueObservation
 
@@ -181,7 +296,7 @@ struct {Feature}View: View {
 ### Seed data
 
 ```swift
-migrator.registerMigration("v4") { db in
+migrator.registerMigration("v{next}") { db in
     try db.execute(
         sql: """
         INSERT INTO category (id, name, icon, scope, sortOrder, isDefault, createdAt)

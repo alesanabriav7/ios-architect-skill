@@ -18,7 +18,7 @@ SwiftUI views, feature components, and view models in the owning feature module.
 - Keep promoted code domain-scoped (for example `Shared/Settings/...`), not in generic shared buckets.
 - Preserve Domain/Data/Presentation split even inside shared modules.
 
-If the feature includes on-device AI generation, also apply `references/foundation_models.md`:
+If the feature includes on-device AI generation, also apply `references/foundation-models.md`:
 
 - Domain: add AI generator protocol and AI input/output models.
 - Data: keep `FoundationModels` session + prompt building here.
@@ -96,6 +96,7 @@ Mapping rules:
 - Keep Domain expressive and persistence primitive.
 - Add explicit mapper paths (`init(from:)` and `toDomain()`).
 - Use stable ordering (`updatedAt` descending) for list-first features.
+- For summary/analytics APIs (for example `fetchAll(for:)`), compute aggregates in SQL and map projection rows; never issue queries inside per-item loops.
 - If a domain needs special conversions (for example currency or measurements), document conversion rules beside the mapper.
 
 ### Record
