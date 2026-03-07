@@ -49,7 +49,7 @@ Do not bulk-load all references when the task is narrow.
 ### Cross-Skill Handoffs
 
 - If custom UI components, theming, or Liquid Glass styling → use the `ios-design-system` skill.
-- If API-backed features, navigation/routing overhaul, privacy audit, or on-device AI → use the `ios-platform` skill.
+- If networking implementation (API client setup, token management, retry/offline), navigation/routing overhaul, privacy audit, or on-device AI → use the `ios-platform` skill. Feature scaffolding (Domain/Data/Presentation structure) stays in this skill.
 
 ## Shared Placement Rule
 

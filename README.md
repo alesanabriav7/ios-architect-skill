@@ -28,9 +28,9 @@ Clone the repo and symlink or copy the skill directories into your project's `.c
 
 ```bash
 git clone https://github.com/alesanabriav7/ios-architect-skill.git
-cp -r ios-architect-skill/ios-architect .claude/skills/ios-architect
-cp -r ios-architect-skill/ios-design-system .claude/skills/ios-design-system
-cp -r ios-architect-skill/ios-platform .claude/skills/ios-platform
+cp -r ios-architect-skill/ios-architect .claude/skills/
+cp -r ios-architect-skill/ios-design-system .claude/skills/
+cp -r ios-architect-skill/ios-platform .claude/skills/
 ```
 
 ## Skills
