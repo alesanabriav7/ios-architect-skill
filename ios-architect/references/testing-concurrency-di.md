@@ -109,34 +109,7 @@ final class {Feature}ViewModel {
 
 Use a DI container only if module count and composition complexity require it.
 
-## Foundation Models DI Pattern (When AI Is Used)
-
-Never couple `LanguageModelSession` directly to view models. Inject a protocol from Domain and keep Foundation Models in Data.
-
-```swift
-import Foundation
-
-protocol {Feature}InsightGeneratorProtocol: Sendable {
-    func generate(from input: {Feature}InsightInput) async throws -> {Feature}Insight
-}
-
-@Observable
-@MainActor
-final class {Feature}ViewModel {
-    private let insightGenerator: {Feature}InsightGeneratorProtocol
-    private let fallbackGenerator: {Feature}InsightGeneratorProtocol
-
-    init(
-        insightGenerator: {Feature}InsightGeneratorProtocol,
-        fallbackGenerator: {Feature}InsightGeneratorProtocol
-    ) {
-        self.insightGenerator = insightGenerator
-        self.fallbackGenerator = fallbackGenerator
-    }
-}
-```
-
-When AI is unavailable or generation fails, use fallback generator behavior from the same protocol.
+For Foundation Models DI/mocking patterns, see the `ios-platform` skill.
 
 ## Swift Testing Baseline
 
@@ -212,20 +185,6 @@ actor Mock{Entity}Repository: {Entity}RepositoryProtocol {
 
             return matchesCompletion && matchesSearch
         }
-    }
-}
-```
-
-## Mock AI Generator
-
-```swift
-import Foundation
-
-struct Mock{Feature}InsightGenerator: {Feature}InsightGeneratorProtocol {
-    var result: Result<{Feature}Insight, Error>
-
-    func generate(from input: {Feature}InsightInput) async throws -> {Feature}Insight {
-        try result.get()
     }
 }
 ```
@@ -308,4 +267,4 @@ For each new feature:
 - Repository mapping and filtering logic.
 - Critical business service logic.
 - At least one integration-style test for persistence-backed flows when feasible.
-- If AI is used: availability + fallback behavior, and prompt-builder unit tests.
+- If AI is used: see the `ios-platform` skill for AI-specific test patterns.

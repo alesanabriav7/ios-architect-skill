@@ -1,4 +1,4 @@
-# Contributing to ios-architect
+# Contributing to ios-architect-skill
 
 ## Architecture Rules
 
@@ -14,12 +14,20 @@
 
 ## Skill Structure
 
-- `ios-architect/SKILL.md` is the skill entry point with frontmatter and load strategy.
-- `ios-architect/references/` contains domain-specific reference files loaded on demand.
-- Only load the references needed for the current task. Do not bulk-load all references.
+This repo contains three skills:
+
+- `ios-architect/` — App and feature scaffolding with Clean Architecture
+- `ios-design-system/` — Design tokens, UI components, theming, accessibility
+- `ios-platform/` — Networking, navigation, privacy, on-device AI
+
+Each skill has:
+- `SKILL.md` — Skill entry point with frontmatter and load strategy
+- `references/` — Domain-specific reference files loaded on demand
+- `evals.json` — Trigger and output quality test cases
 
 ## Adding References
 
-1. Create a new `.md` file in `ios-architect/references/`.
-2. Add it to the load strategy in `SKILL.md` under the appropriate build type.
+1. Create a new `.md` file in the appropriate skill's `references/` directory.
+2. Add it to the load strategy in that skill's `SKILL.md`.
 3. Keep references focused on a single concern (e.g., networking, navigation, testing).
+4. Only load the references needed for the current task. Do not bulk-load all references.

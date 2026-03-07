@@ -1,0 +1,172 @@
+[
+  {
+    "eval_id": 1,
+    "eval_name": "trigger-new-app-scaffold",
+    "prompt": "Create a new iOS app called FitTracker with user profiles and workout logging",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "runs-intake", "text": "Asks intake questions before generating code", "type": "quality" },
+      { "id": "clean-arch", "text": "Generates Domain/Data/Presentation layers", "type": "quality" },
+      { "id": "uses-observable", "text": "Uses @Observable for ViewModels", "type": "quality" },
+      { "id": "compile-ready", "text": "Produces compile-ready Swift files", "type": "quality" },
+      { "id": "reports-files", "text": "Reports the list of created files", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 2,
+    "eval_name": "trigger-new-app-recipe",
+    "prompt": "Scaffold an iOS recipe app with categories, search, and favorites",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "runs-intake", "text": "Asks intake questions before generating code", "type": "quality" },
+      { "id": "clean-arch", "text": "Generates Domain/Data/Presentation layers", "type": "quality" },
+      { "id": "feature-local", "text": "Each feature owns its own models and repository", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 3,
+    "eval_name": "trigger-add-feature",
+    "prompt": "Add a Favorites feature to my iOS app where users can bookmark items",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "runs-intake", "text": "Asks intake questions before generating code", "type": "quality" },
+      { "id": "clean-arch", "text": "Generates Domain/Data/Presentation layers", "type": "quality" },
+      { "id": "swift-testing", "text": "Uses Swift Testing framework for tests", "type": "quality" },
+      { "id": "swift-concurrency", "text": "Uses async/await instead of Combine or callbacks", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 4,
+    "eval_name": "trigger-settings-screen",
+    "prompt": "Add a Settings screen to my iOS app with user preferences and notification toggles",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "runs-intake", "text": "Asks intake questions before generating code", "type": "quality" },
+      { "id": "clean-arch", "text": "Generates Domain/Data/Presentation layers", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 5,
+    "eval_name": "trigger-shared-service",
+    "prompt": "Create an analytics service that multiple features in my iOS app can use",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "runs-intake", "text": "Asks intake questions before generating code", "type": "quality" },
+      { "id": "shared-justification", "text": "Treats shared module as exception, not default", "type": "quality" },
+      { "id": "domain-protocol", "text": "Defines a domain protocol for the service", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 6,
+    "eval_name": "trigger-database-migration",
+    "prompt": "Add a new column 'avatarURL' to the Users table in my iOS app's GRDB database",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "migration-pattern", "text": "Uses GRDB DatabaseMigrator with versioned migration", "type": "quality" },
+      { "id": "compile-ready", "text": "Produces compile-ready Swift migration code", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 7,
+    "eval_name": "trigger-spm-package",
+    "prompt": "Create a local Swift Package for the Networking layer of my iOS app",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "runs-intake", "text": "Asks intake questions before generating code", "type": "quality" },
+      { "id": "clean-arch", "text": "Separates domain protocols from data implementation", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 8,
+    "eval_name": "trigger-grdb-feature",
+    "prompt": "Build a Notes feature with local GRDB persistence for my iOS app",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "runs-intake", "text": "Asks intake questions before generating code", "type": "quality" },
+      { "id": "clean-arch", "text": "Generates Domain/Data/Presentation layers", "type": "quality" },
+      { "id": "grdb-repository", "text": "Implements repository with GRDB read/write methods", "type": "quality" },
+      { "id": "compile-ready", "text": "Produces compile-ready Swift files", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 9,
+    "eval_name": "trigger-api-only-feature",
+    "prompt": "Add a Weather feature that fetches data from a REST API with no local persistence",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "runs-intake", "text": "Asks intake questions before generating code", "type": "quality" },
+      { "id": "clean-arch", "text": "Generates Domain/Data/Presentation layers", "type": "quality" },
+      { "id": "no-grdb", "text": "Does not include GRDB or database code", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 10,
+    "eval_name": "trigger-refactor-clean-arch",
+    "prompt": "Refactor my iOS app's UserProfile module to follow Clean Architecture with proper layer separation",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "clean-arch", "text": "Generates Domain/Data/Presentation layers", "type": "quality" },
+      { "id": "feature-local", "text": "Keeps models and repository local to the feature", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 11,
+    "eval_name": "no-trigger-python",
+    "prompt": "Write a Python Flask API for user registration",
+    "should_trigger": false
+  },
+  {
+    "eval_id": 12,
+    "eval_name": "no-trigger-web",
+    "prompt": "Build a React dashboard with TypeScript and Tailwind CSS",
+    "should_trigger": false
+  },
+  {
+    "eval_id": 13,
+    "eval_name": "no-trigger-android",
+    "prompt": "Create an Android app with Kotlin and Jetpack Compose",
+    "should_trigger": false
+  },
+  {
+    "eval_id": 14,
+    "eval_name": "no-trigger-swiftui-view",
+    "prompt": "Write a SwiftUI view for a login form with email and password fields",
+    "should_trigger": false
+  },
+  {
+    "eval_id": 15,
+    "eval_name": "no-trigger-networking",
+    "prompt": "Set up URLSession networking with token refresh in my iOS app",
+    "should_trigger": false
+  },
+  {
+    "eval_id": 16,
+    "eval_name": "no-trigger-privacy",
+    "prompt": "Add a privacy manifest to my iOS app",
+    "should_trigger": false
+  },
+  {
+    "eval_id": 17,
+    "eval_name": "no-trigger-general-swift",
+    "prompt": "What's the difference between a struct and a class in Swift?",
+    "should_trigger": false
+  },
+  {
+    "eval_id": 18,
+    "eval_name": "no-trigger-code-review",
+    "prompt": "Review my Swift code for performance issues and suggest improvements",
+    "should_trigger": false
+  },
+  {
+    "eval_id": 19,
+    "eval_name": "no-trigger-async-await",
+    "prompt": "How do I use async/await in Swift?",
+    "should_trigger": false
+  },
+  {
+    "eval_id": 20,
+    "eval_name": "no-trigger-design-system",
+    "prompt": "Create a design token system with spacing, colors, and typography for my iOS app",
+    "should_trigger": false
+  }
+]

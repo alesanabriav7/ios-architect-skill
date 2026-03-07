@@ -1,6 +1,6 @@
-# ios-architect
+# ios-architect-skill
 
-A skill for scaffolding modern iOS apps and features with Clean Architecture, MVVM, SwiftUI, GRDB, Swift Concurrency, and modular local packages.
+A multi-skill toolkit for scaffolding modern iOS apps with Clean Architecture, MVVM, SwiftUI, GRDB, Swift Concurrency, and modular local packages.
 
 Works with any LLM-powered coding agent.
 
@@ -24,54 +24,99 @@ npx skills add https://github.com/alesanabriav7/ios-architect-skill
 
 ### Option C — Manual
 
-Clone the repo and symlink or copy the `ios-architect/` directory into your project's `.claude/skills/` folder:
+Clone the repo and symlink or copy the skill directories into your project's `.claude/skills/` folder:
 
 ```bash
 git clone https://github.com/alesanabriav7/ios-architect-skill.git
 cp -r ios-architect-skill/ios-architect .claude/skills/ios-architect
+cp -r ios-architect-skill/ios-design-system .claude/skills/ios-design-system
+cp -r ios-architect-skill/ios-platform .claude/skills/ios-platform
 ```
 
-## What the Skill Offers
+## Skills
 
-- **New app scaffolding** — Tuist project, Clean Architecture layers, GRDB database, design system, and test targets
-- **Feature scaffolding** — Domain models, repository protocols/implementations, GRDB records, view models, SwiftUI views
-- **Database & migrations** — GRDB schema migrations with versioned migrators
-- **Design system** — Reusable SwiftUI components, color tokens, typography
-- **Networking** — URLSession-based API clients with async/await
-- **Navigation** — Coordinator pattern with deep linking support
-- **Testing** — Swift Testing, concurrency patterns, dependency injection
-- **Privacy & compliance** — Privacy manifests, required reason APIs
-- **Foundation Models** — On-device AI with deterministic fallback
-- **Liquid Glass** — iOS 26+ Liquid Glass styling with version-gated fallbacks
+This repo contains three skills that work together:
+
+### ios-architect
+
+Scaffold apps and features with Clean Architecture (Domain/Data/Presentation), MVVM, GRDB, and Swift Concurrency.
+
+- New app scaffolding — Tuist project, Clean Architecture layers, GRDB database, and test targets
+- Feature scaffolding — Domain models, repository protocols/implementations, view models, SwiftUI views
+- Database & migrations — GRDB schema migrations with versioned migrators
+- Testing — Swift Testing, concurrency patterns, dependency injection
+
+### ios-design-system
+
+Design tokens, reusable components, theming, and accessibility.
+
+- Design tokens — Spacing, color, radius, and typography scales
+- Components — Reusable SwiftUI components with accessibility built in
+- Theming — Light/dark mode color palettes
+- Liquid Glass — iOS 26+ styling with version-gated fallbacks
+
+### ios-platform
+
+Networking, navigation, privacy compliance, and on-device AI integration.
+
+- Networking — URLSession API clients with async/await, retry, and offline-first
+- Navigation — Type-safe routing with deep linking support
+- Privacy & compliance — Privacy manifests, account deletion flows
+- Foundation Models — On-device AI with runtime availability checks
 
 ## Skill Structure
 
 ```
 ios-architect/
 ├── SKILL.md
+├── evals.json
 └── references/
     ├── intake.md
     ├── new-app-scaffold.md
     ├── feature-scaffold.md
     ├── database-and-migrations.md
+    └── testing-concurrency-di.md
+
+ios-design-system/
+├── SKILL.md
+├── evals.json
+└── references/
     ├── design-system.md
-    ├── testing-concurrency-di.md
+    └── liquid-glass.md
+
+ios-platform/
+├── SKILL.md
+├── evals.json
+└── references/
     ├── networking.md
     ├── navigation.md
     ├── privacy-and-compliance.md
-    ├── foundation-models.md
-    └── liquid-glass.md
+    └── foundation-models.md
 ```
 
 ## Usage
 
 Tell your AI assistant:
 
-> Use the ios-architect skill. I want to build a new app called BudgetTracker.
+> Create a new iOS app called BudgetTracker with expense tracking and categories.
 
-> Use the ios-architect skill. I need a new Subscriptions feature with title, amount, billing cycle, and next billing date.
+> Add a Favorites feature to my iOS app with local GRDB persistence.
 
-> Use the ios-architect skill. Add Liquid Glass styling to the finance dashboard.
+> Build a reusable card component with Liquid Glass styling.
+
+> Set up URLSession networking with token refresh for my iOS app.
+
+## Evals
+
+Each skill includes an `evals.json` file with trigger and output quality tests (50 total across 3 skills). These validate that the right skill activates for a given prompt and that generated code meets quality assertions.
+
+| Skill | Trigger | No-trigger | Total |
+|---|---|---|---|
+| ios-architect | 10 | 10 | 20 |
+| ios-design-system | 7 | 7 | 14 |
+| ios-platform | 8 | 8 | 16 |
+
+Run evals via the **skill-creator** eval/benchmark mode, or use any LLM eval framework (Promptfoo, Braintrust, etc.) by reading the `evals.json` files.
 
 ## License
 
