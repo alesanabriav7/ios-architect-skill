@@ -10,9 +10,8 @@ Ask:
 2. New feature module
 3. New cross-domain shared service
 4. New cross-domain shared model
-5. New design system component
-6. New database migration
-7. New local SPM package
+5. New database migration
+6. New local SPM package
 
 Then ask:
 
@@ -20,14 +19,6 @@ Then ask:
 - What does it do?
 - Which fields and behaviors are required?
 - Is it feature-owned or cross-domain shared? If shared, which 2+ features/domains consume it?
-- Does it require on-device AI (`FoundationModels`)? If yes, single response or streaming?
-- Should the UI adopt Liquid Glass (`iOS 26+`) styling? If yes, which screens/components?
-- If Liquid Glass is enabled, should search use native `.searchable(...)` (default) or a custom in-content search field (exception)?
-- Are there TabView behavior changes (tab set, per-tab search/filter state, tab-level controls)?
-- What is the fallback behavior when AI is unavailable?
-- Does the app collect user data or use Required Reason APIs (UserDefaults, file timestamps, disk space)?
-- Is iPad or multi-column navigation required?
-- What is the authentication model (none / required / optional)?
 - If fetching lists from a remote API, what pagination strategy is used (cursor / offset / full fetch)?
 
 ## Required Intake Fields
@@ -43,13 +34,6 @@ Capture this checklist in short form:
 - Data source (local DB only, remote API only, remote API + response cache, or both with offline-first sync)
 - Integration points (shared services, existing features, notifications)
 - Test scope (unit, integration, UI/snapshot)
-- UI style constraints (standard tokens only, or include Liquid Glass on iOS 26+)
-- Liquid Glass scope details (native searchable usage, TabView behavior updates, custom-surface exceptions, fallback expectations)
-- AI mode (none, single-shot generation, or streaming)
-- AI fallback path (template/rules-based behavior)
-- Prompt input boundaries (what data is allowed to be sent to the model)
-- Privacy: data collection, Required Reason APIs, account deletion requirement
-- Navigation: iPad/multi-column layout required (NavigationSplitView) or iPhone-only (NavigationStack)
 
 If the request is underspecified, state safe defaults and continue.
 
@@ -85,3 +69,13 @@ Report:
 - Files created/updated
 - Checks executed and outcomes
 - Assumptions/defaults applied
+
+## Sister Skill Handoff Checklist
+
+After intake, check if the request needs sister skills:
+
+- **Custom UI components, theming, or Liquid Glass styling** → invoke the `ios-design-system` skill
+- **API client setup, networking** → invoke the `ios-platform` skill (networking reference)
+- **Navigation overhaul, deep linking, iPad/multi-column** → invoke the `ios-platform` skill (navigation reference)
+- **Privacy manifests, Required Reason APIs, account deletion** → invoke the `ios-platform` skill (privacy reference)
+- **On-device AI / Foundation Models** → invoke the `ios-platform` skill (foundation-models reference)

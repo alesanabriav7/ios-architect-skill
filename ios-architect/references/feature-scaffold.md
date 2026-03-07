@@ -18,19 +18,9 @@ SwiftUI views, feature components, and view models in the owning feature module.
 - Keep promoted code domain-scoped (for example `Shared/Settings/...`), not in generic shared buckets.
 - Preserve Domain/Data/Presentation split even inside shared modules.
 
-If the feature includes on-device AI generation, also apply `references/foundation-models.md`:
+If the feature includes on-device AI generation, invoke the `ios-platform` skill for Foundation Models integration patterns (Domain protocol + Data implementation + deterministic fallback).
 
-- Domain: add AI generator protocol and AI input/output models.
-- Data: keep `FoundationModels` session + prompt building here.
-- Presentation: consume protocol only; always support deterministic fallback UX.
-
-If the feature includes Liquid Glass styling, also apply `references/liquid-glass.md`:
-
-- Keep glass APIs in Presentation/shared UI components only.
-- Gate with `#available(iOS 26.0, *)` and provide deterministic fallback materials.
-- Reuse design-system glass components instead of one-off inline styles.
-- Use native `.searchable(...)` for searchable views unless product explicitly requires a custom in-content field.
-- For tab-based features, keep search/filter state scoped per tab and use search-tab APIs (`role: .search`, `tabViewSearchActivation(_:)`) when needed.
+If the feature includes Liquid Glass styling, invoke the `ios-design-system` skill for glass patterns, availability gating, and design-system component reuse.
 
 ## Domain Templates
 

@@ -1,5 +1,5 @@
 # Claude Code
-.claude/settings.local.json
+.claude/
 
 # macOS
 .DS_Store
@@ -8,4 +8,6 @@
 *.swp
 *.swo
 *~
-.claude/worktrees/
+
+# Plans
+plans/

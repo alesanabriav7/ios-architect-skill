@@ -1,0 +1,135 @@
+[
+  {
+    "eval_id": 1,
+    "eval_name": "trigger-api-client",
+    "prompt": "Set up a URLSession API client with JSON decoding and error handling for my iOS app",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "clean-arch", "text": "Defines domain protocol separate from URLSession implementation", "type": "quality" },
+      { "id": "data-layer-imports", "text": "Framework imports (Foundation/URLSession) only in Data layer", "type": "quality" },
+      { "id": "compile-ready", "text": "Produces compile-ready Swift code", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 2,
+    "eval_name": "trigger-token-auth",
+    "prompt": "Add token-based authentication with refresh token flow to my iOS networking layer",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "clean-arch", "text": "Defines domain protocol separate from implementation", "type": "quality" },
+      { "id": "secure-storage", "text": "Uses Keychain or secure storage for tokens", "type": "quality" },
+      { "id": "compile-ready", "text": "Produces compile-ready Swift code", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 3,
+    "eval_name": "trigger-app-routing",
+    "prompt": "Set up app routing with deep linking support for my iOS app",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "type-safe-routes", "text": "Defines type-safe route enum or protocol", "type": "quality" },
+      { "id": "compile-ready", "text": "Produces compile-ready Swift code", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 4,
+    "eval_name": "trigger-navigation-split",
+    "prompt": "Configure NavigationSplitView for iPad with sidebar and detail views",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "split-view", "text": "Uses NavigationSplitView with proper column configuration", "type": "quality" },
+      { "id": "compile-ready", "text": "Produces compile-ready Swift code", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 5,
+    "eval_name": "trigger-privacy-manifest",
+    "prompt": "Create a privacy manifest for my iOS app that uses analytics and location tracking",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "privacy-manifest", "text": "Generates PrivacyInfo.xcprivacy with required API declarations", "type": "quality" },
+      { "id": "nutrition-labels", "text": "Covers data collection nutrition label categories", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 6,
+    "eval_name": "trigger-account-deletion",
+    "prompt": "Implement account deletion flow that complies with App Store requirements",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "clean-arch", "text": "Defines domain protocol separate from implementation", "type": "quality" },
+      { "id": "data-cleanup", "text": "Handles local data cleanup on deletion", "type": "quality" },
+      { "id": "compile-ready", "text": "Produces compile-ready Swift code", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 7,
+    "eval_name": "trigger-foundation-models",
+    "prompt": "Integrate Apple Foundation Models for on-device AI text generation in my iOS app",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "availability-check", "text": "Includes runtime availability check for Foundation Models", "type": "quality" },
+      { "id": "domain-no-platform", "text": "Domain layer has no platform framework imports", "type": "quality" },
+      { "id": "compile-ready", "text": "Produces compile-ready Swift code", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 8,
+    "eval_name": "trigger-retry-offline",
+    "prompt": "Add retry logic and offline-first networking with request queuing to my iOS app",
+    "should_trigger": true,
+    "assertions": [
+      { "id": "clean-arch", "text": "Defines domain protocol separate from implementation", "type": "quality" },
+      { "id": "retry-strategy", "text": "Implements configurable retry with exponential backoff", "type": "quality" },
+      { "id": "compile-ready", "text": "Produces compile-ready Swift code", "type": "quality" }
+    ]
+  },
+  {
+    "eval_id": 9,
+    "eval_name": "no-trigger-feature-scaffold",
+    "prompt": "Create a new feature with Domain/Data/Presentation layers for user profiles",
+    "should_trigger": false
+  },
+  {
+    "eval_id": 10,
+    "eval_name": "no-trigger-card-component",
+    "prompt": "Build a reusable card component with shadow and rounded corners",
+    "should_trigger": false
+  },
+  {
+    "eval_id": 11,
+    "eval_name": "no-trigger-backend",
+    "prompt": "Write a Go backend service with gRPC endpoints",
+    "should_trigger": false
+  },
+  {
+    "eval_id": 12,
+    "eval_name": "no-trigger-android",
+    "prompt": "Set up Retrofit networking for my Android app",
+    "should_trigger": false
+  },
+  {
+    "eval_id": 13,
+    "eval_name": "no-trigger-grdb-migration",
+    "prompt": "Add a GRDB migration to create a new Messages table",
+    "should_trigger": false
+  },
+  {
+    "eval_id": 14,
+    "eval_name": "no-trigger-general-swift",
+    "prompt": "What are the differences between actors and classes in Swift?",
+    "should_trigger": false
+  },
+  {
+    "eval_id": 15,
+    "eval_name": "no-trigger-theming",
+    "prompt": "Set up a color theming system with design tokens for my iOS app",
+    "should_trigger": false
+  },
+  {
+    "eval_id": 16,
+    "eval_name": "no-trigger-liquid-glass",
+    "prompt": "Create Liquid Glass effects for my app's tab bar and navigation",
+    "should_trigger": false
+  }
+]
