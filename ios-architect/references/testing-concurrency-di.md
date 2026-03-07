@@ -259,6 +259,28 @@ func loadItems() async {
 
 - Target 16.67ms frame budget for 60fps. Any work exceeding this on the main thread causes visible jank — offload to `@concurrent` functions or background actors.
 
+## Screenshot Automation and Visual QA
+
+For screenshot capture, preview repositories, visual regression workflows, and batch capture scripts, see `references/screenshots.md`.
+
+## Mock Deep Link Resolver
+
+Use in tests to return predetermined destinations without network or database access:
+
+```swift
+actor MockDeepLinkResolver: DeepLinkResolverProtocol {
+    private var stubbedResults: [URL: DeepLinkDestination] = [:]
+
+    func stub(url: URL, destination: DeepLinkDestination) {
+        stubbedResults[url] = destination
+    }
+
+    func resolve(_ url: URL) async throws -> DeepLinkDestination? {
+        stubbedResults[url]
+    }
+}
+```
+
 ## Minimal Test Coverage Expectations
 
 For each new feature:

@@ -1,0 +1,21 @@
+[
+  {"query": "I need a new iOS app for tracking habits", "should_trigger": true},
+  {"query": "Add a checkout feature to my existing iOS project", "should_trigger": true},
+  {"query": "Can you restructure my iOS codebase into clean layers?", "should_trigger": true},
+  {"query": "Set up a GRDB migration for a new column in my app", "should_trigger": true},
+  {"query": "Create a local Swift package for my shared utilities", "should_trigger": true},
+  {"query": "I need an offline-first favorites feature with local persistence", "should_trigger": true},
+  {"query": "Write me a Python Flask API for user registration", "should_trigger": false},
+  {"query": "I need a React dashboard with TypeScript and Tailwind", "should_trigger": false},
+  {"query": "Help me build an Android app with Kotlin and Jetpack Compose", "should_trigger": false},
+  {"query": "Can you write me a login form view with email and password fields in SwiftUI?", "should_trigger": false},
+  {"query": "Write a SwiftUI login view with TextField bindings for email and SecureField for password", "should_trigger": false},
+  {"query": "How do I set up URLSession with token refresh for my API calls?", "should_trigger": false},
+  {"query": "Implement an APIClient with URLSession, token refresh interceptor, and retry logic", "should_trigger": false},
+  {"query": "I need to add a privacy manifest before submitting to the App Store", "should_trigger": false},
+  {"query": "When should I use a struct vs a class in Swift?", "should_trigger": false},
+  {"query": "Explain Swift value semantics vs reference semantics and Sendable implications", "should_trigger": false},
+  {"query": "Can you look at my Swift code and tell me if there are any performance problems?", "should_trigger": false},
+  {"query": "I'm confused about async/await in Swift — how does it work?", "should_trigger": false},
+  {"query": "I want to set up a design system with spacing, colors, and typography tokens for my app", "should_trigger": false}
+]

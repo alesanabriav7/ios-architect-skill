@@ -1,0 +1,83 @@
+{
+  "skill_name": "ios-architect",
+  "baseline_note": "Every feature benchmark implicitly expects Domain (model + repository protocol), Data (repository impl), and Presentation (ViewModel @Observable + SwiftUI View). Expectations below test only what is unique to each scenario.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to build a fitness app called FitTracker where users can create profiles and log their workouts",
+      "expected_output": "Full new-app scaffold: Tuist project config, app entry point, root navigation, and first feature with all three layers",
+      "expectations": [
+        "Generates Tuist project configuration files",
+        "Generates an app entry point (e.g. @main App struct with WindowGroup)",
+        "Generates root navigation (NavigationStack or TabView)",
+        "First feature includes all three layers (Domain/Data/Presentation) with compile-ready Swift files"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Help me start a recipe app from scratch — I need categories, a search bar, and a way to save favorites",
+      "expected_output": "Multi-feature app scaffold where each feature owns its models and repository locally",
+      "expectations": [
+        "Generates at least two distinct feature modules (e.g. Categories, Favorites)",
+        "Each feature owns its own models and repository (feature-local, no shared bucket)",
+        "No catch-all Shared/Models or Shared/Data directories"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I want to add a Notes feature that saves everything locally on the device so it works offline",
+      "expected_output": "Feature with GRDB-backed repository, .task modifier for loading, and protocol-driven DI",
+      "expectations": [
+        "Implements repository with GRDB read/write methods",
+        "View includes .task modifier to trigger initial data load",
+        "ViewModel uses protocol-driven repository injection via init parameter"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I need a Weather screen that pulls data from an API — no need to save anything locally",
+      "expected_output": "API-only feature with no database code — repository uses URLSession or network client",
+      "expectations": [
+        "Repository implementation uses URLSession or network client instead of local database",
+        "No GRDB imports, database records, or migration code generated"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I want to add analytics tracking that works across all features in my app — every screen should be able to log events",
+      "expected_output": "Cross-domain shared service with domain protocol, treated as exception to feature-local default",
+      "expectations": [
+        "Treats shared module as exception, not default",
+        "Defines a domain protocol for the service",
+        "Service is domain-scoped within Shared (e.g. Shared/Analytics) with its own layer split"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I need to add an avatar URL field to the Users table in my app's database",
+      "expected_output": "GRDB versioned migration adding the column via DatabaseMigrator",
+      "expectations": [
+        "Uses GRDB DatabaseMigrator with a versioned migration identifier",
+        "Produces compile-ready Swift migration code that adds a column"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "I want to pull my networking code into its own local Swift Package so other modules can reuse it",
+      "expected_output": "Local SPM package with separate interface and implementation targets",
+      "expectations": [
+        "Generates a Package.swift with at least two targets (interface + implementation)",
+        "Separates domain protocols from concrete implementation"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "My UserProfile code is a mess — everything is in one file. Can you split it into proper layers?",
+      "expected_output": "Refactors monolith into Domain/Data/Presentation layers with feature-local ownership",
+      "expectations": [
+        "Splits existing code into at least three separate layer files or directories",
+        "Keeps models and repository local to the feature (no promotion to Shared)"
+      ]
+    }
+  ]
+}
