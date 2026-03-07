@@ -1,6 +1,24 @@
 ---
 name: ios-architect
-description: Scaffold modern iOS apps and features with Clean Architecture, MVVM, SwiftUI, GRDB, Swift Concurrency, optional Apple Foundation Models integration, and modular local packages. Use when creating a new iOS app, adding a feature/service/model/migration/design system component/package, or enforcing Domain/Data/Presentation separation with feature-local ownership by default and shared modules only for true cross-domain concerns. Read only the minimal reference files needed for the requested build type, then generate compile-ready files and validate. ALWAYS use this skill whenever the user wants to build an iOS app from scratch, add a new feature or module to an existing iOS app, create a Swift Package, add a GRDB migration, scaffold Domain/Data/Presentation layers, refactor iOS code into clean architecture, set up offline-first persistence, create an API-only feature, add a shared cross-domain service, set up screenshot automation or preview data, or restructure an iOS codebase — even if they don't explicitly mention "architecture" or "clean architecture". Any request involving iOS app creation, iOS feature scaffolding, iOS module structure, favorites/settings/analytics features, or splitting code into layers should trigger this skill.
+description: >
+  Scaffold modern iOS apps and features with Clean Architecture, MVVM, SwiftUI,
+  GRDB, Swift Concurrency, optional Apple Foundation Models integration, and
+  modular local packages. Use when creating a new iOS app, adding a
+  feature/service/model/migration/design system component/package, or enforcing
+  Domain/Data/Presentation separation with feature-local ownership by default
+  and shared modules only for true cross-domain concerns. Read only the minimal
+  reference files needed for the requested build type, then generate
+  compile-ready files and validate. ALWAYS use this skill whenever the user
+  wants to build an iOS app from scratch, add a new feature or module to an
+  existing iOS app, create a Swift Package, add a GRDB migration, scaffold
+  Domain/Data/Presentation layers, refactor iOS code into clean architecture,
+  set up offline-first persistence, create an API-only feature, add a shared
+  cross-domain service, set up screenshot automation or preview data, or
+  restructure an iOS codebase — even if they don't explicitly mention
+  "architecture" or "clean architecture". Any request involving iOS app
+  creation, iOS feature scaffolding, iOS module structure,
+  favorites/settings/analytics features, or splitting code into layers should
+  trigger this skill.
 license: MIT
 allowed-tools: Read Bash(tuist:*) Bash(swift:*)
 metadata:
