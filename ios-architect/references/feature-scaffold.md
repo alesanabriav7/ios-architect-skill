@@ -670,6 +670,18 @@ struct {Entity}Sheet: View {
     }
 }
 
+## Screenshot Support
+
+If screenshots are requested or test scope includes UI/snapshot, also generate:
+
+- `Preview{Entity}Repository` — in-memory repository seeded from `PreviewFixture` data.
+- A sample JSON context file for the feature's main screen.
+- `APP_USE_PREVIEW_DATA` toggle at the app root if not already present.
+
+See `references/screenshots.md` for the full app-side contract, capture configuration, and visual QA workflow.
+
+---
+
 struct {Entity}Row: View {
     let item: {Entity}
 

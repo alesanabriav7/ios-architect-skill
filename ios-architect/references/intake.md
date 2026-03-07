@@ -34,8 +34,21 @@ Capture this checklist in short form:
 - Data source (local DB only, remote API only, remote API + response cache, or both with offline-first sync)
 - Integration points (shared services, existing features, notifications)
 - Test scope (unit, integration, UI/snapshot)
+- Screenshot capture (Do you need screenshot capture for App Store assets or visual regression? If yes, load `references/screenshots.md`)
 
 If the request is underspecified, state safe defaults and continue.
+
+## Non-Interactive Fallback
+
+When the user's prompt already specifies enough detail, or when operating in a non-interactive context:
+
+1. Do NOT ask intake questions and wait. Infer the build type from the prompt and state assumptions inline.
+2. Apply safe defaults for missing fields:
+   - Minimum deployment target: iOS 18.0
+   - Ownership: feature-local
+   - Data source: infer from prompt; default to in-memory if unclear
+   - Test scope: unit tests for ViewModel
+3. Proceed directly to code generation with all three layers (Domain, Data, Presentation).
 
 ## Output Contract
 
@@ -53,6 +66,17 @@ Never:
 - Mix storage framework details into Domain.
 - Put feature models/data/services into generic shared folders.
 - Use `try!` for initialization paths that can fail.
+
+## Completeness Gate
+
+Before reporting completion, verify you generated files in ALL three layers:
+- [ ] At least one Domain model struct
+- [ ] At least one repository protocol
+- [ ] At least one repository implementation
+- [ ] At least one ViewModel with `@Observable @MainActor`
+- [ ] At least one SwiftUI View that uses the ViewModel
+
+If any checkbox is missing, generate the missing files before reporting.
 
 ## Validation Contract
 
