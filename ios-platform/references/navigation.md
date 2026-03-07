@@ -307,13 +307,14 @@ Model confirmation dialogs as a dedicated struct so the router can drive them de
 
 ```swift
 struct ConfirmationState: Identifiable {
-    let id = UUID().uuidString
+    let id: String
     let title: String
     let message: String
     let destructiveLabel: String
     let onConfirm: @MainActor () -> Void
 
     init(
+        id: String = UUID().uuidString,
         title: String,
         message: String,
         destructiveLabel: String = "Delete",
