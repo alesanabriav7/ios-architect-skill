@@ -117,7 +117,7 @@ For screens that need additional state (e.g., a specific filter pre-selected, da
 When adding a new `AppScreen` case:
 1. Add the case to the enum and wire its `ScreenPath` (see `navigation.md`).
 2. Create a new JSON config file in `screenshots/` with the matching `SCREENSHOT_SCREEN` value.
-3. Add it to the batch capture script so it runs with `--skip-build` after the first screen.
+3. The batch capture script discovers configs automatically — no manual update needed.
 
 ## Running the Capture
 
@@ -140,13 +140,18 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/.."
 
-SCREENS=({feature}List {feature}Detail {feature}CreateSheet {feature}EditSheet settings)
+# Discover screens dynamically from JSON config files in screenshots/
+CONFIGS=("$SCRIPT_DIR"/*.json)
+if [[ ${#CONFIGS[@]} -eq 0 || ! -e "${CONFIGS[0]}" ]]; then
+  echo "No screenshot configs found in $SCRIPT_DIR" >&2
+  exit 1
+fi
 
-for i in "${!SCREENS[@]}"; do
+for i in "${!CONFIGS[@]}"; do
   skip=""
   [[ "$i" -gt 0 ]] && skip="--skip-build"
   # Replace with the project's capture tool invocation:
-  <capture-tool> --context "$SCRIPT_DIR/${SCREENS[$i]}.json" $skip
+  <capture-tool> --context "${CONFIGS[$i]}" $skip
 done
 ```
 
