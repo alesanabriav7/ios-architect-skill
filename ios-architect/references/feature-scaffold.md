@@ -204,6 +204,15 @@ final class {Entity}Repository: {Entity}RepositoryProtocol, Sendable {
         }
     }
 
+    func fetchByID(_ id: String) async throws -> {Entity}? {
+        try await dbManager.reader.read { db in
+            try {Entity}Record
+                .filter(Column("id") == id)
+                .fetchOne(db)?
+                .toDomain()
+        }
+    }
+
     func fetch(matching filter: {Entity}Filter) async throws -> [{Entity}] {
         try await dbManager.reader.read { db in
             var request = {Entity}Record
@@ -236,6 +245,16 @@ final class {Entity}Repository: {Entity}RepositoryProtocol, Sendable {
 
 ```swift
 import Foundation
+
+enum NetworkError: Error, Equatable, Sendable {
+    case noConnection
+    case unauthorized
+    case notFound
+    case serverError(Int)
+    case timeout
+    case decodingFailed(String)
+    case unexpected(String)
+}
 
 enum AppError: Error, Equatable, Sendable {
     case network(NetworkError)
@@ -571,24 +590,31 @@ struct {Feature}View: View {
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
-                VStack(spacing: Space.m) {
-                    Toggle("Show completed only", isOn: $viewModel.showCompletedOnly)
-                        .font(.dsCaption)
-                        .padding(.horizontal, Space.l)
-                        .onChange(of: viewModel.showCompletedOnly) {
-                            Task { await viewModel.loadItems() }
-                        }
-
-                    ScrollView {
-                        LazyVStack(spacing: Space.m) {
-                            ForEach(viewModel.items) { item in
-                                NavigationLink(value: item) {
-                                    {Entity}Row(item: item)
-                                }
-                                .buttonStyle(.plain)
+                if viewModel.isLoading && viewModel.items.isEmpty {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if viewModel.items.isEmpty {
+                    ContentUnavailableView("No Items", systemImage: "tray", description: Text("Add your first item to get started."))
+                } else {
+                    VStack(spacing: Space.m) {
+                        Toggle("Show completed only", isOn: $viewModel.showCompletedOnly)
+                            .font(.dsCaption)
+                            .padding(.horizontal, Space.l)
+                            .onChange(of: viewModel.showCompletedOnly) {
+                                Task { await viewModel.loadItems() }
                             }
+
+                        ScrollView {
+                            LazyVStack(spacing: Space.m) {
+                                ForEach(viewModel.items) { item in
+                                    NavigationLink(value: item) {
+                                        {Entity}Row(item: item)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.horizontal, Space.l)
                         }
-                        .padding(.horizontal, Space.l)
                     }
                 }
 

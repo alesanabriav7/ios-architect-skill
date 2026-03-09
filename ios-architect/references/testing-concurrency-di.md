@@ -85,6 +85,7 @@ struct {Entity}Filter: Sendable {
 protocol {Entity}RepositoryProtocol: Sendable {
     func save(_ item: {Entity}) async throws
     func delete(_ item: {Entity}) async throws
+    func fetchByID(_ id: String) async throws -> {Entity}?
     func fetchAll() async throws -> [{Entity}]
     func fetch(matching filter: {Entity}Filter) async throws -> [{Entity}]
 }
@@ -92,6 +93,7 @@ protocol {Entity}RepositoryProtocol: Sendable {
 final class {Entity}Repository: {Entity}RepositoryProtocol, Sendable {
     func save(_ item: {Entity}) async throws { }
     func delete(_ item: {Entity}) async throws { }
+    func fetchByID(_ id: String) async throws -> {Entity}? { nil }
     func fetchAll() async throws -> [{Entity}] { [] }
     func fetch(matching filter: {Entity}Filter) async throws -> [{Entity}] { [] }
 }
@@ -168,6 +170,7 @@ actor Mock{Entity}Repository: {Entity}RepositoryProtocol {
 
     func save(_ item: {Entity}) async throws { items.append(item) }
     func delete(_ item: {Entity}) async throws { items.removeAll { $0.id == item.id } }
+    func fetchByID(_ id: String) async throws -> {Entity}? { items.first { $0.id == id } }
     func fetchAll() async throws -> [{Entity}] { items }
     func fetch(matching filter: {Entity}Filter) async throws -> [{Entity}] {
         items.filter { item in
