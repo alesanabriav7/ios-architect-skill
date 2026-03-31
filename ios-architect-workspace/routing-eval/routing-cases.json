@@ -1,6 +1,6 @@
 {
   "description": "Routing eval — validates intent-based skill selection. Prompts use natural team language, not technical keywords. Each case reflects how a real team member would phrase the request.",
-  "skills_dir": "/Users/ale/Dev/ios-architect-skill",
+  "skills_dir": "../..",
   "cases": [
     {
       "id": 1,

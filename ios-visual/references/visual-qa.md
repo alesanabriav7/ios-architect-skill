@@ -10,17 +10,19 @@ Your primary capture tool. Builds, installs, launches with preview data, overrid
 
 ```bash
 # Single screen — full build
-npx tsx ~/dev/screenshots-ios/src/capture.ts --context screenshots/<screen>.json
+npx tsx "$SCREENSHOTS_IOS_DIR/src/capture.ts" --context screenshots/<screen>.json
 
 # Single screen — skip rebuild (reuse last build)
-npx tsx ~/dev/screenshots-ios/src/capture.ts --context screenshots/<screen>.json --skip-build
+npx tsx "$SCREENSHOTS_IOS_DIR/src/capture.ts" --context screenshots/<screen>.json --skip-build
 
 # Quick check of already-running simulator
 xcrun simctl io booted screenshot /tmp/quick-check.png
 ```
 
+Set `SCREENSHOTS_IOS_DIR` to the local clone of the `screenshots-ios` tool (e.g. `export SCREENSHOTS_IOS_DIR=~/dev/screenshots-ios`).
+
 Context file fields: `scheme`, `simulator`, `outputDir`, `screenshotName`, `waitSeconds`, `launchEnv`.
-Full reference: `~/dev/screenshots-ios/GUIDE.md`.
+Full reference: `$SCREENSHOTS_IOS_DIR/GUIDE.md`.
 
 ### Quick capture (no build required)
 
@@ -134,7 +136,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-TOOL="$HOME/dev/screenshots-ios/src/capture.ts"
+TOOL="${SCREENSHOTS_IOS_DIR}/src/capture.ts"
 
 cd "$REPO_ROOT"
 
@@ -154,7 +156,7 @@ done
 |---------|-----|
 | Screenshot is blank/black | Increase `waitSeconds` in context file |
 | Wrong screen appears | Verify app reads the env var; add debug print in `.onAppear` |
-| `No available simulator` | Run `npx tsx ~/dev/screenshots-ios/src/capture.ts --list-devices` |
+| `No available simulator` | Run `npx tsx "$SCREENSHOTS_IOS_DIR/src/capture.ts" --list-devices` |
 | `Built app not found` | Remove `--skip-build` to trigger fresh build |
 | Status bar looks wrong | Set `statusBar.enabled: false` for older simulators |
 | Capture works but data is wrong | Check `APP_USE_PREVIEW_DATA` is read at app entry point |
