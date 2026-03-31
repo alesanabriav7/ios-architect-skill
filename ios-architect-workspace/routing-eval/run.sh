@@ -9,11 +9,14 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILLS_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 CASES_FILE="$SCRIPT_DIR/routing-cases.json"
 
+SKILLS=(ios-architect ios-persistence ios-testing ios-visual ios-platform ios-design-system)
+SKILLS_REGEX=$(IFS='|'; echo "${SKILLS[*]}")
+
 build_system_prompt() {
   echo "You are a routing classifier for iOS development skills. Given a user request, reply with ONLY the skill name that best handles it. No explanation, no punctuation — just the skill name."
   echo ""
   echo "Available skills:"
-  for skill in ios-architect ios-persistence ios-testing ios-visual ios-platform ios-design-system; do
+  for skill in "${SKILLS[@]}"; do
     local desc
     desc=$(awk '/^description:/{found=1; next} found && /^[a-z]/{exit} found{print}' "$SKILLS_DIR/$skill/SKILL.md" | sed 's/^  //' | tr '\n' ' ')
     echo ""
@@ -29,7 +32,7 @@ current_group=""
 check() {
   local prompt="$1" expected="$2"
   local got
-  got=$(echo "$prompt" | claude -p --disable-slash-commands --system-prompt "$SYSTEM_PROMPT" --model claude-haiku-4-5-20251001 2>/dev/null | grep -Eo 'ios-(architect|persistence|testing|visual|platform|design-system)' | head -1)
+  got=$(echo "$prompt" | claude -p --disable-slash-commands --system-prompt "$SYSTEM_PROMPT" --model claude-haiku-4-5-20251001 2>&1 | grep -Eo "$SKILLS_REGEX" | head -1)
   if [[ "$got" == "$expected" ]]; then
     echo "  ✓  $prompt"
     pass=$((pass + 1))
