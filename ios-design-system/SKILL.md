@@ -1,6 +1,14 @@
 ---
 name: ios-design-system
-description: Design tokens, UI components, theming, color systems, typography, spacing, Liquid Glass styling, and accessibility for iOS apps. Use when creating or updating design system components, tokens, theming, colors, glass effects, or UI styling.
+description: >
+  Use when someone wants to create or update a reusable UI component, set up the app's
+  visual language, or apply visual styling. This covers: building reusable buttons, cards,
+  or list rows, setting up color tokens, typography, and spacing constants, applying Liquid
+  Glass effects, and ensuring components follow the design system. The user might say
+  "create a reusable card component", "set up the color palette", "add a glass effect to
+  the toolbar", "this button should match the design system", or "build a loading skeleton
+  view". Not for: building complete feature screens with business logic (ios-architect),
+  or checking if the running app looks correct (ios-visual).
 license: MIT
 allowed-tools: Read Bash(swift:*)
 metadata:
