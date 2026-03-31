@@ -1,0 +1,210 @@
+{
+  "description": "Routing eval — validates intent-based skill selection. Prompts use natural team language, not technical keywords. Each case reflects how a real team member would phrase the request.",
+  "skills_dir": "../..",
+  "cases": [
+    {
+      "id": 1,
+      "group": "ios-architect",
+      "prompt": "Create a favorites feature for the app",
+      "expected_skill": "ios-architect"
+    },
+    {
+      "id": 2,
+      "group": "ios-architect",
+      "prompt": "Build a new app that tracks workouts and calories",
+      "expected_skill": "ios-architect"
+    },
+    {
+      "id": 3,
+      "group": "ios-architect",
+      "prompt": "This file is getting too big, help me split it into proper layers",
+      "expected_skill": "ios-architect"
+    },
+    {
+      "id": 4,
+      "group": "ios-architect",
+      "prompt": "Add a settings screen where users can edit their profile",
+      "expected_skill": "ios-architect"
+    },
+    {
+      "id": 5,
+      "group": "ios-architect",
+      "prompt": "Agrega una pantalla de historial de pagos",
+      "expected_skill": "ios-architect",
+      "notes": "Spanish — should still route correctly"
+    },
+    {
+      "id": 6,
+      "group": "ios-architect",
+      "prompt": "How should I structure the analytics service that multiple features share?",
+      "expected_skill": "ios-architect"
+    },
+    {
+      "id": 7,
+      "group": "ios-persistence",
+      "prompt": "Add a new column to store the user's avatar URL",
+      "expected_skill": "ios-persistence"
+    },
+    {
+      "id": 8,
+      "group": "ios-persistence",
+      "prompt": "The transaction list should refresh automatically when data changes",
+      "expected_skill": "ios-persistence"
+    },
+    {
+      "id": 9,
+      "group": "ios-persistence",
+      "prompt": "Set up the database for the project",
+      "expected_skill": "ios-persistence"
+    },
+    {
+      "id": 10,
+      "group": "ios-persistence",
+      "prompt": "How do I fetch all entries between two dates?",
+      "expected_skill": "ios-persistence"
+    },
+    {
+      "id": 11,
+      "group": "ios-persistence",
+      "prompt": "The data isn't persisting between app launches",
+      "expected_skill": "ios-persistence"
+    },
+    {
+      "id": 12,
+      "group": "ios-persistence",
+      "prompt": "Necesito guardar el progreso del usuario localmente",
+      "expected_skill": "ios-persistence",
+      "notes": "Spanish — should still route correctly"
+    },
+    {
+      "id": 13,
+      "group": "ios-testing",
+      "prompt": "Write tests for the WorkoutViewModel",
+      "expected_skill": "ios-testing"
+    },
+    {
+      "id": 14,
+      "group": "ios-testing",
+      "prompt": "The app crashes randomly, I think it's a threading issue",
+      "expected_skill": "ios-testing"
+    },
+    {
+      "id": 15,
+      "group": "ios-testing",
+      "prompt": "I'm getting a Sendable warning and I don't know how to fix it",
+      "expected_skill": "ios-testing"
+    },
+    {
+      "id": 16,
+      "group": "ios-testing",
+      "prompt": "How do I create a fake version of the repository for tests?",
+      "expected_skill": "ios-testing"
+    },
+    {
+      "id": 17,
+      "group": "ios-testing",
+      "prompt": "Add test coverage for the payment flow",
+      "expected_skill": "ios-testing"
+    },
+    {
+      "id": 18,
+      "group": "ios-testing",
+      "prompt": "I have a data race warning on this actor, how do I fix it?",
+      "expected_skill": "ios-testing"
+    },
+    {
+      "id": 19,
+      "group": "ios-visual",
+      "prompt": "Does the home screen match the Figma design?",
+      "expected_skill": "ios-visual"
+    },
+    {
+      "id": 20,
+      "group": "ios-visual",
+      "prompt": "Something looks off after my last change, can you check?",
+      "expected_skill": "ios-visual"
+    },
+    {
+      "id": 21,
+      "group": "ios-visual",
+      "prompt": "Take a screenshot of all the main screens before I open the PR",
+      "expected_skill": "ios-visual"
+    },
+    {
+      "id": 22,
+      "group": "ios-visual",
+      "prompt": "The spacing on this card looks wrong",
+      "expected_skill": "ios-visual",
+      "notes": "Ambiguous — could be design-system. But 'looks wrong on running app' = ios-visual. If they said 'the component has wrong spacing', ios-design-system would be closer."
+    },
+    {
+      "id": 23,
+      "group": "ios-visual",
+      "prompt": "Run visual regression on all screens",
+      "expected_skill": "ios-visual"
+    },
+    {
+      "id": 24,
+      "group": "ios-platform",
+      "prompt": "Set up the API client to call our backend",
+      "expected_skill": "ios-platform"
+    },
+    {
+      "id": 25,
+      "group": "ios-platform",
+      "prompt": "Add deep link support so users can share a link to a specific item",
+      "expected_skill": "ios-platform"
+    },
+    {
+      "id": 26,
+      "group": "ios-platform",
+      "prompt": "The token expires and the app doesn't refresh it automatically",
+      "expected_skill": "ios-platform"
+    },
+    {
+      "id": 27,
+      "group": "ios-platform",
+      "prompt": "I need a privacy manifest for App Store submission",
+      "expected_skill": "ios-platform"
+    },
+    {
+      "id": 28,
+      "group": "ios-design-system",
+      "prompt": "Create a reusable card component for the design system",
+      "expected_skill": "ios-design-system"
+    },
+    {
+      "id": 29,
+      "group": "ios-design-system",
+      "prompt": "Add a Liquid Glass effect to the navigation bar",
+      "expected_skill": "ios-design-system"
+    },
+    {
+      "id": 30,
+      "group": "ios-design-system",
+      "prompt": "Set up the color tokens and typography for the app",
+      "expected_skill": "ios-design-system"
+    },
+    {
+      "id": 31,
+      "group": "ambiguous",
+      "prompt": "Add offline support to the Notes feature",
+      "expected_skill": "ios-architect",
+      "notes": "Feature + persistence → ios-architect wins because the scope is the whole feature. ios-architect's scaffold includes persistence patterns."
+    },
+    {
+      "id": 32,
+      "group": "ambiguous",
+      "prompt": "The button color is wrong",
+      "expected_skill": "ios-visual",
+      "notes": "Running app issue → ios-visual. If they said 'the Button component uses the wrong color token', ios-design-system would be closer."
+    },
+    {
+      "id": 33,
+      "group": "ambiguous",
+      "prompt": "Quiero que la app funcione sin internet",
+      "expected_skill": "ios-architect",
+      "notes": "Spanish. Scope is a feature/app capability → ios-architect. If they already have the feature and just need the DB layer, ios-persistence."
+    }
+  ]
+}

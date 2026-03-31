@@ -1,20 +1,17 @@
 ---
 name: ios-architect
 description: >
-  Scaffold modern iOS apps and features with Clean Architecture, MVVM, SwiftUI,
-  GRDB, Swift Concurrency, and modular local packages. Use when creating a new
-  iOS app, adding a feature/service/model/migration/design system
-  component/package, or enforcing Domain/Data/Presentation separation.
-  ALWAYS use this skill when the user wants to build an iOS app from scratch,
-  add a new feature or module, create a Swift Package, add a GRDB migration,
-  scaffold Domain/Data/Presentation layers, refactor iOS code into clean
-  architecture, set up offline-first persistence, create an API-only feature,
-  add a shared cross-domain service, set up screenshot automation or preview
-  data, or restructure an iOS codebase — even if they don't explicitly mention
-  "architecture" or "clean architecture". Any request involving iOS app
-  creation, iOS feature scaffolding, iOS module structure,
-  favorites/settings/analytics features, or splitting code into layers should
-  trigger this skill.
+  Use when someone is building something new in iOS or organizing existing code into
+  proper structure. This covers: creating a new app from scratch, adding a new feature
+  or screen, making a feature work offline end-to-end, splitting messy code into layers,
+  creating a shared service used by multiple features, or setting up the project skeleton.
+  The user might say "create a feature for X", "add a screen that does Y", "how should I
+  structure this?", "build an app that tracks Z", "add offline support to this feature",
+  "I want the app to work without internet", or "split this into proper layers". Use this
+  even if they don't mention architecture — if they want to add or reorganize functionality
+  at the feature level, this is the right skill. Not for: isolated DB queries or column
+  changes (ios-persistence), writing tests only (ios-testing), visual UI checks
+  (ios-visual), or API client setup (ios-platform).
 license: MIT
 allowed-tools: Read Bash(tuist:*) Bash(swift:*)
 metadata:
@@ -53,7 +50,7 @@ Keep token usage low by loading only the references needed for the current reque
 
 ### New database migration
 
-- `references/database-and-migrations.md`
+→ Use the `ios-persistence` skill directly.
 
 ### New local SPM package
 
@@ -65,7 +62,10 @@ Do not bulk-load all references when the task is narrow.
 ### Cross-Skill Handoffs
 
 - If custom UI components, theming, or Liquid Glass styling → use the `ios-design-system` skill.
-- If networking implementation (API client setup, token management, retry/offline), navigation/routing overhaul, privacy audit, or on-device AI → use the `ios-platform` skill. Feature scaffolding (Domain/Data/Presentation structure) stays in this skill.
+- If networking, navigation/routing overhaul, privacy audit, or on-device AI → use the `ios-platform` skill.
+- If standalone DB work, migrations, queries, or ValueObservation → use the `ios-persistence` skill.
+- If writing tests, mocks, fixing actor isolation, or Sendable errors → use the `ios-testing` skill.
+- If visual regression, pixel-perfect comparison vs design, or UI error detection → use the `ios-visual` skill.
 
 ## Shared Placement Rule
 
@@ -95,3 +95,6 @@ Do not bulk-load all references when the task is narrow.
 
 - **ios-design-system** — design tokens, UI components, Liquid Glass styling
 - **ios-platform** — networking, navigation, privacy, Foundation Models
+- **ios-persistence** — GRDB setup, migrations, ValueObservation
+- **ios-testing** — Swift Testing, mock repositories, DI, concurrency
+- **ios-visual** — visual regression, pixel-perfect comparison, UI error detection
