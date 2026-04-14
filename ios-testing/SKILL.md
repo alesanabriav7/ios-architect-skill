@@ -1,8 +1,9 @@
 ---
 name: ios-testing
 description: >
-  Use when someone wants to test their code, fix a threading or concurrency bug, or set
-  up dependency injection. This covers: writing unit or integration tests, creating mock
+  ONLY for test/mock/concurrency/DI work — not for building new features. Use when
+  someone wants to test their code, fix a threading or concurrency bug, or set up
+  dependency injection. This covers: writing unit or integration tests, creating mock
   or fake implementations, debugging crashes that happen on background threads, fixing
   Swift 6 Sendable errors or actor isolation warnings, wiring dependencies for testability,
   and ensuring thread safety. The user might say "write tests for this", "how do I test
@@ -24,6 +25,7 @@ Emit compile-ready Swift Testing code. All mocks are actor-based. All view model
 ## Load Strategy
 
 Always read `references/testing.md`.
+If the request involves concurrency, Sendable, or actor isolation: also read `ios-architect/references/testing-concurrency-di.md`.
 
 ## Execution Contract
 

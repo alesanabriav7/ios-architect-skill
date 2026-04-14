@@ -1,5 +1,7 @@
 # Testing, Concurrency, and DI
 
+> **Canonical source for Swift concurrency rules.** This file is the single source of truth for concurrency rules across all sister skills. ios-testing and other skills defer to this file.
+
 Use this file for quality gates, thread-safety, and dependency wiring.
 
 ## Concurrency Rules

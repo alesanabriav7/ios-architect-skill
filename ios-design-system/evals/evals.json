@@ -1,0 +1,65 @@
+{
+  "skill_name": "ios-design-system",
+  "baseline_note": "Every design system benchmark expects compile-ready SwiftUI using the token system (Space, Radius, Color, Font tokens). Components must include accessibility support (Dynamic Type, VoiceOver, minimum 44pt tap targets) by default.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a design token system with spacing, colors, and typography for my iOS app",
+      "expected_output": "Space, Radius, Color, and Font token definitions with semantic naming",
+      "expectations": [
+        "Defines a Space enum with at least xs/s/m/l/xl constants",
+        "Defines a Radius enum with size constants",
+        "Defines semantic Color extensions (appBackground, textPrimary, accentPrimary, strokeSubtle, etc.)",
+        "Defines Font extensions with role-based scale (dsBody, dsTitle, dsCaption, etc.)",
+        "Code is compile-ready Swift"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Build a reusable button component with primary and destructive variants for use across multiple features",
+      "expected_output": "Reusable SwiftUI button using design tokens with accessibility support and multiple variants",
+      "expectations": [
+        "Uses design tokens for color, spacing, and corner radius — no hardcoded values",
+        "Supports at least two visual variants",
+        "Minimum 44pt tap target",
+        "Includes accessibilityLabel and accessibilityAddTraits(.isButton)",
+        "Supports Dynamic Type scaling",
+        "Code is compile-ready Swift"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Add Liquid Glass styling to a card component for iOS 26+ with a graceful fallback for earlier versions",
+      "expected_output": "SwiftUI card with glassEffect for iOS 26+ and .ultraThinMaterial fallback for iOS 17",
+      "expectations": [
+        "Uses @available(iOS 26.0, *) or if #available(iOS 26, *) guard for the glass variant",
+        "Applies .glassEffect modifier for iOS 26+",
+        "Provides a fallback using .background(.ultraThinMaterial) or equivalent for earlier iOS",
+        "Code is compile-ready Swift"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Create a reusable empty state view with an icon, title, subtitle, and optional action button",
+      "expected_output": "EmptyState component using design tokens with VoiceOver support and optional CTA",
+      "expectations": [
+        "Uses design tokens for spacing, typography, and color — no hardcoded values",
+        "Accepts title and subtitle as LocalizedStringKey",
+        "Action button is optional (nil by default)",
+        "Decorative icon is hidden from VoiceOver",
+        "Code is compile-ready Swift"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Update the spacing system to use an 8pt base grid and add xxl (32pt) and xxxl (48pt) values",
+      "expected_output": "Updated Space enum with 8pt grid values and additional size constants",
+      "expectations": [
+        "All spacing values are multiples of 8",
+        "Adds xxl (32pt) and xxxl (48pt) constants",
+        "Existing Space constants remain present and unchanged",
+        "Code is compile-ready Swift"
+      ]
+    }
+  ]
+}

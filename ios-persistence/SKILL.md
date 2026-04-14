@@ -1,17 +1,17 @@
 ---
 name: ios-persistence
 description: >
-  Use when someone has a focused database or local storage task: setting up a database,
+  ONLY for isolated database operations — no Domain/Data/Presentation scaffolding. Use
+  when someone has a focused database or local storage task: setting up a database,
   adding or changing a column or table, writing a query, making a view auto-update when
   data changes, or caching data locally (API responses, images, user content). The user
   might say "save this to disk", "add a column for avatarURL", "the list should update
   automatically", "how do I query entries by date?", "set up the database", "cache the
   API responses", "add a local cache to reduce network calls", or "the data isn't
   persisting between launches".
-  This skill is for isolated DB operations — not for building a full feature. When
-  someone says "add offline support to a feature" or "make this feature work without
-  internet", that is a full feature change handled by ios-architect, which includes DB
-  patterns as part of the scaffold.
+  Not for building a full feature. When someone says "add offline support to a feature"
+  or "make this feature work without internet", that is a full feature change handled by
+  ios-architect, which includes DB patterns as part of the scaffold.
 license: MIT
 allowed-tools: Read Bash(swift:*) Bash(tuist:*)
 metadata:

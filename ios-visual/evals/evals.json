@@ -1,0 +1,39 @@
+{
+  "skill_name": "ios-visual",
+  "baseline_note": "Every visual benchmark expects tool availability to be checked before capture. Never assumes screenshots-ios is installed — always verifies and falls back to xcrun simctl if unavailable. Never requires a fresh build for quick checks.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Take a quick screenshot of my running iOS app to check if the home screen looks correct",
+      "expected_output": "Screenshot captured using the available tool, analyzed for visual issues, findings reported",
+      "expectations": [
+        "Checks which capture tool is available before attempting capture",
+        "Falls back to xcrun simctl if screenshots-ios is unavailable",
+        "Does not require a fresh build for a quick check of an already-running simulator",
+        "Reports at least one specific visual observation about the captured screen"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Run visual regression on all my app screens and tell me what changed since the last approved baseline",
+      "expected_output": "Current screenshots compared against screenshots/baseline/, each screen classified as Pass, Expected change, or Regression",
+      "expectations": [
+        "Captures current screenshots",
+        "Reads both current and baseline images with the Read tool",
+        "Classifies each screen as Pass, Expected change, or Regression",
+        "Provides specific descriptions of what changed for any Regression finding"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Compare my Expenses list screen against the Figma export I'm providing and tell me exactly what's different",
+      "expected_output": "Element-level comparison between captured screenshot and design reference, findings prioritized as P1/P2",
+      "expectations": [
+        "Reads both the captured screenshot and the provided design reference with the Read tool",
+        "Reports element-level differences (position, size, color, typography)",
+        "Classifies each finding as P1 (visible to users, must fix) or P2 (subtle, optional)",
+        "For each P1 finding, identifies the likely SwiftUI modifier or token to change"
+      ]
+    }
+  ]
+}

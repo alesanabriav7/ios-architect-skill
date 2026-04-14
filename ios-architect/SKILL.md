@@ -34,11 +34,13 @@ Keep token usage low by loading only the references needed for the current reque
 - `references/feature-scaffold.md`
 - `references/database-and-migrations.md`
 - `references/testing-concurrency-di.md`
+- `references/error-taxonomy.md`
 - If screenshots or UI/snapshot testing: `references/screenshots.md`
 
 ### New feature
 
 - `references/feature-scaffold.md`
+- `references/error-taxonomy.md`
 - If persistence changes: `references/database-and-migrations.md`
 - If tests/concurrency concerns: `references/testing-concurrency-di.md`
 - If screenshots or UI/snapshot testing: `references/screenshots.md`
@@ -61,11 +63,11 @@ Do not bulk-load all references when the task is narrow.
 
 ### Cross-Skill Handoffs
 
-- If custom UI components, theming, or Liquid Glass styling → use the `ios-design-system` skill.
-- If networking, navigation/routing overhaul, privacy audit, or on-device AI → use the `ios-platform` skill.
-- If standalone DB work, migrations, queries, or ValueObservation → use the `ios-persistence` skill.
-- If writing tests, mocks, fixing actor isolation, or Sendable errors → use the `ios-testing` skill.
-- If visual regression, pixel-perfect comparison vs design, or UI error detection → use the `ios-visual` skill.
+- **ios-design-system**: invoke when the request mentions a reusable UI component (used by 2+ features), a color/spacing token, theming, or Liquid Glass. Do NOT invoke for a one-off view inside a feature.
+- **ios-persistence**: invoke when the request is ONLY about a migration, query optimization, or ValueObservation setup with no Domain/Data/Presentation changes. If Domain/Data layers change alongside persistence, ios-architect handles it and loads `database-and-migrations.md` itself.
+- **ios-platform**: invoke when the request is ONLY about the API client, navigation router overhaul, privacy manifest, or Foundation Models integration. Feature scaffolding (Domain/Data/Presentation) stays in ios-architect even if networking is involved.
+- **ios-testing**: invoke when the request is ONLY about writing or fixing tests, mocks, or actor isolation errors, with no new feature scaffolding.
+- **ios-visual**: invoke when the request involves screenshots, visual regression, or design comparison.
 
 ## Shared Placement Rule
 
@@ -84,12 +86,13 @@ Do not bulk-load all references when the task is narrow.
    - **Presentation** — at least one ViewModel (`@Observable @MainActor`) AND at least one SwiftUI View that consumes it
    - Skipping the Presentation layer is never acceptable. Every feature must have a working View + ViewModel.
    - Keep each layer in the owning feature by default; only promote to shared for proven cross-domain reuse.
-3. For new-app scaffolds: generate Tuist config AND app code (entry point, root navigation, first feature with all three layers) in the same response. Never stop after emitting only project configuration files.
-4. Use modern APIs (`@Observable`, `@MainActor`, Swift Concurrency, Swift Testing).
-5. Validate generated output:
+3. If screenshots are in scope, generate the full JSON config and env var router hook (one JSON file per `AppScreen` case, plus `APP_USE_PREVIEW_DATA` env var at the app entry point) before handing off to ios-visual.
+4. For new-app scaffolds: generate Tuist config AND app code (entry point, root navigation, first feature with all three layers) in the same response. Never stop after emitting only project configuration files.
+5. Use modern APIs (`@Observable`, `@MainActor`, Swift Concurrency, Swift Testing).
+6. Validate generated output:
    - New Tuist app: `tuist generate` + one build
    - Feature/module changes: targeted build/tests
-6. Report created files, validations run, and assumptions.
+7. Report created files, validations run, and assumptions.
 
 ## Sister Skills
 

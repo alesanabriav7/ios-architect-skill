@@ -1,0 +1,14 @@
+[
+  {"query": "Take a screenshot of my running iOS app to check how it looks", "should_trigger": true},
+  {"query": "Does my home screen match the Figma design I have?", "should_trigger": true},
+  {"query": "Something looks off in my list view after my last change — can you verify the layout?", "should_trigger": true},
+  {"query": "Run visual regression on all my app screens before I merge this PR", "should_trigger": true},
+  {"query": "The spacing in my card component looks wrong — check if it matches the design tokens", "should_trigger": true},
+  {"query": "Compare my current settings screen against the design mockup I'll provide", "should_trigger": true},
+  {"query": "I'm getting a crash when I tap the navigation button — what's wrong with my code?", "should_trigger": false},
+  {"query": "Add a new settings screen to my iOS app", "should_trigger": false},
+  {"query": "The data isn't loading in my list view — debug the repository", "should_trigger": false},
+  {"query": "Set up SwiftUI snapshot testing in my test suite", "should_trigger": false},
+  {"query": "Build a reusable card component", "should_trigger": false},
+  {"query": "Help me set up CI with GitHub Actions for my iOS project", "should_trigger": false}
+]

@@ -309,6 +309,71 @@ actor KeychainTokenProvider: TokenProviderProtocol {
 }
 ```
 
+## Token Lifecycle
+
+`TokenProviderProtocol` handles token operations, but the rest of the auth lifecycle is owned by other components:
+
+### Initialization at App Launch
+
+`KeychainTokenProvider` reads any existing token from Keychain on `currentToken()` call — it requires no async initialization. Pass it to `APIClient` at the app root:
+
+```swift
+@main
+struct {AppName}App: App {
+    private let tokenProvider = KeychainTokenProvider(
+        refreshURL: URL(string: "{baseURL}/auth/refresh")!
+    )
+    private lazy var apiClient: APIClientProtocol = URLSessionAPIClient(
+        baseURL: URL(string: "{baseURL}")!,
+        tokenProvider: tokenProvider
+    )
+}
+```
+
+`APIClient` is not responsible for creating the initial token — it assumes one exists or throws `.unauthorized`.
+
+### On Login Success
+
+After a successful login, store the token via `saveToKeychain(_:)`:
+
+```swift
+// In AuthRepository (Data layer):
+func login(email: String, password: String) async throws -> AuthSession {
+    let session: AuthSession = try await apiClient.send(loginRequest)
+    await tokenProvider.saveToKeychain(session.accessToken)
+    return session
+}
+```
+
+### On Logout
+
+Clear the token from Keychain to revoke access:
+
+```swift
+extension KeychainTokenProvider {
+    func clear() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account
+        ]
+        SecItemDelete(query as CFDictionary)
+    }
+}
+
+// In AuthFeature logout handler:
+await tokenProvider.clear()
+```
+
+### Token Lifecycle Summary
+
+| Event | Owner | Location |
+|---|---|---|
+| Token creation | `AuthFeature` (login flow) | `AuthRepository.login()` |
+| Token read | `KeychainTokenProvider.currentToken()` | Called by `APIClient` per request |
+| Token refresh | `KeychainTokenProvider.refreshToken()` | Called by `APIClient` on 401 |
+| Token revocation | `KeychainTokenProvider.clear()` | Called by `AuthFeature` on logout |
+
 ## JSONDecoder Configuration
 
 Shared decoder for consistent API response parsing.

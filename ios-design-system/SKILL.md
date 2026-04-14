@@ -27,10 +27,14 @@ Emit compile-ready SwiftUI components using the token system. Validate accessibi
 
 ## Execution Contract
 
-1. Emit compile-ready SwiftUI components using the token system (Space, Radius, Color, font modifiers).
-2. Validate accessibility: minimum contrast ratios, Dynamic Type support, VoiceOver labels.
-3. Keep components in the design system package — not in feature modules.
-4. If the request requires creating a new feature module (not just a component), reference the `ios-architect` skill for architecture placement and scaffolding.
+1. If the request is for a one-off view inside a single feature (not reusable across 2+ features), route to `ios-architect` instead. Only proceed if the component will be shared across 2+ features or is a token/theming change.
+2. If user specifies component name + purpose → scaffold it immediately using design-system.md templates.
+3. If user gives only component name → scaffold a generic version (card, button, or input depending on name semantics), state assumptions inline, proceed.
+4. Never ask for details before generating a first draft.
+5. Emit compile-ready SwiftUI components using the token system (Space, Radius, Color, font modifiers).
+6. Validate accessibility: minimum contrast ratios, Dynamic Type support, VoiceOver labels.
+7. Keep components in the design system package — not in feature modules.
+8. If the request requires creating a new feature module (not just a component), reference the `ios-architect` skill for architecture placement and scaffolding.
 
 ## Sister Skills
 

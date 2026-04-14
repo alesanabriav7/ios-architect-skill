@@ -1,0 +1,18 @@
+[
+  {"query": "Set up a URLSession API client with JSON decoding and error handling for my iOS app", "should_trigger": true},
+  {"query": "Add token-based authentication with automatic refresh to my iOS networking layer", "should_trigger": true},
+  {"query": "Configure deep linking with a custom URL scheme for my iOS app", "should_trigger": true},
+  {"query": "Set up NavigationSplitView for iPad with a sidebar and detail pane", "should_trigger": true},
+  {"query": "Create a privacy manifest for my iOS app that uses analytics and location tracking", "should_trigger": true},
+  {"query": "Add on-device AI text generation using Apple Foundation Models", "should_trigger": true},
+  {"query": "Implement retry logic with exponential backoff for my API requests", "should_trigger": true},
+  {"query": "Create a Weather feature that calls an API and shows current conditions and a 5-day forecast", "should_trigger": false},
+  {"query": "Build a reusable card component with shadow and rounded corners", "should_trigger": false},
+  {"query": "Add a GRDB migration to create a Messages table", "should_trigger": false},
+  {"query": "Scaffold a new iOS app from scratch with Clean Architecture", "should_trigger": false},
+  {"query": "Write unit tests for my API client", "should_trigger": false},
+  {"query": "Build a React Native app with TypeScript", "should_trigger": false},
+  {"query": "Set up color tokens and spacing for my design system", "should_trigger": false},
+  {"query": "Run visual regression on my app screens", "should_trigger": false},
+  {"query": "What are the differences between actors and classes in Swift?", "should_trigger": false}
+]

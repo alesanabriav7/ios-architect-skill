@@ -1,0 +1,17 @@
+[
+  {"query": "Add a GRDB migration to add an avatarURL column to the users table", "should_trigger": true},
+  {"query": "Set up an initial GRDB database with migrations for my iOS app", "should_trigger": true},
+  {"query": "The expense list isn't refreshing when I add new items — set up live updates", "should_trigger": true},
+  {"query": "My GRDB query fetching expenses by category is slow on large datasets — optimize it", "should_trigger": true},
+  {"query": "Write a query that returns the total amount spent per category for a date range", "should_trigger": true},
+  {"query": "The data isn't persisting between app launches — fix the local storage setup", "should_trigger": true},
+  {"query": "Set up GRDB associations so I can fetch a Category with all its Expenses", "should_trigger": true},
+  {"query": "Add an offline Expenses feature that fetches from the API and syncs locally", "should_trigger": false},
+  {"query": "I need a Notes app that saves everything locally and syncs in the background", "should_trigger": false},
+  {"query": "Create the Expense feature with Domain, Data, and Presentation layers", "should_trigger": false},
+  {"query": "Set up URLSession API networking with a response cache", "should_trigger": false},
+  {"query": "Write a Python backend with PostgreSQL and SQLAlchemy", "should_trigger": false},
+  {"query": "Build a reusable list component for my design system", "should_trigger": false},
+  {"query": "Write tests for my GRDB repository with a mock database", "should_trigger": false},
+  {"query": "What is the difference between DatabasePool and DatabaseQueue in GRDB?", "should_trigger": false}
+]
