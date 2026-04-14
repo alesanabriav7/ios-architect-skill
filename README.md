@@ -24,18 +24,19 @@ npx skills add https://github.com/alesanabriav7/ios-architect-skill
 
 ### Option C — Manual
 
-Clone the repo and symlink or copy the skill directories into your project's `.claude/skills/` folder:
+Clone the repo and copy the skill directories into your project's `.claude/skills/` folder:
 
 ```bash
 git clone https://github.com/alesanabriav7/ios-architect-skill.git
 cp -r ios-architect-skill/ios-architect .claude/skills/
 cp -r ios-architect-skill/ios-design-system .claude/skills/
 cp -r ios-architect-skill/ios-platform .claude/skills/
+cp -r ios-architect-skill/ios-persistence .claude/skills/
+cp -r ios-architect-skill/ios-testing .claude/skills/
+cp -r ios-architect-skill/ios-visual .claude/skills/
 ```
 
 ## Skills
-
-This repo contains three skills that work together:
 
 ### ios-architect
 
@@ -44,7 +45,7 @@ Scaffold apps and features with Clean Architecture (Domain/Data/Presentation), M
 - New app scaffolding — Tuist project, Clean Architecture layers, GRDB database, and test targets
 - Feature scaffolding — Domain models, repository protocols/implementations, view models, SwiftUI views
 - Database & migrations — GRDB schema migrations with versioned migrators
-- Testing — Swift Testing, concurrency patterns, dependency injection
+- Error taxonomy — typed domain errors with propagation patterns
 
 ### ios-design-system
 
@@ -64,34 +65,75 @@ Networking, navigation, privacy compliance, and on-device AI integration.
 - Privacy & compliance — Privacy manifests, account deletion flows
 - Foundation Models — On-device AI with runtime availability checks
 
+### ios-persistence
+
+Focused GRDB operations without full feature scaffolding.
+
+- Schema setup — DatabaseManager, migrations, table definitions
+- Queries — Fetch, insert, update, delete with proper Data-layer isolation
+- ValueObservation — Auto-updating queries for reactive UI
+- Local caching — API response and image caching patterns
+
+### ios-testing
+
+Tests, mocks, concurrency fixes, and dependency injection — not feature building.
+
+- Unit & integration tests — Swift Testing with compile-ready assertions
+- Mocks — Actor-based fake implementations for repositories and services
+- Concurrency — Sendable conformance, actor isolation, Swift 6 fixes
+- DI wiring — Dependency injection setup for testability
+
+### ios-visual
+
+Screenshot capture and visual regression against designs or references.
+
+- Simulator screenshots — Capture any screen via `simctl`
+- Visual diff — Compare current UI against a reference image using Claude vision
+- Layout validation — Detect broken spacing, clipped content, or misaligned elements
+- Pre-merge regression — Catch visual regressions before merging a PR
+
 ## Skill Structure
 
 ```
 ios-architect/
 ├── SKILL.md
-├── evals.json
 └── references/
     ├── intake.md
     ├── new-app-scaffold.md
     ├── feature-scaffold.md
     ├── database-and-migrations.md
-    └── testing-concurrency-di.md
+    ├── testing-concurrency-di.md
+    ├── error-taxonomy.md
+    └── screenshots.md
 
 ios-design-system/
 ├── SKILL.md
-├── evals.json
 └── references/
     ├── design-system.md
     └── liquid-glass.md
 
 ios-platform/
 ├── SKILL.md
-├── evals.json
 └── references/
     ├── networking.md
     ├── navigation.md
     ├── privacy-and-compliance.md
     └── foundation-models.md
+
+ios-persistence/
+├── SKILL.md
+└── references/
+    └── persistence.md
+
+ios-testing/
+├── SKILL.md
+└── references/
+    └── testing.md
+
+ios-visual/
+├── SKILL.md
+└── references/
+    └── visual-qa.md
 ```
 
 ## Usage
@@ -106,17 +148,11 @@ Tell your AI assistant:
 
 > Set up URLSession networking with token refresh for my iOS app.
 
-## Evals
+> Add a column for avatarURL to the users table.
 
-Each skill includes an `evals.json` file with trigger and output quality tests (50 total across 3 skills). These validate that the right skill activates for a given prompt and that generated code meets quality assertions.
+> Write tests for my ExpenseViewModel.
 
-| Skill | Trigger | No-trigger | Total |
-|---|---|---|---|
-| ios-architect | 10 | 10 | 20 |
-| ios-design-system | 7 | 7 | 14 |
-| ios-platform | 8 | 8 | 16 |
-
-Run evals via the **skill-creator** eval/benchmark mode, or use any LLM eval framework (Promptfoo, Braintrust, etc.) by reading the `evals.json` files.
+> Does the home screen match my Figma design?
 
 ## License
 
