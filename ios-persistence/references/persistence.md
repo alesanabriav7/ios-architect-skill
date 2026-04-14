@@ -306,3 +306,72 @@ migrator.registerMigration("v{next}") { db in
     )
 }
 ```
+
+## Associations
+
+Use GRDB associations for relationships between tables. Define associations as static properties on the record type.
+
+### Defining Associations
+
+```swift
+struct CategoryRecord: Codable, FetchableRecord, PersistableRecord {
+    static let databaseTableName = "category"
+    static let expenses = hasMany(ExpenseRecord.self)
+
+    var id: String
+    var name: String
+}
+
+struct ExpenseRecord: Codable, FetchableRecord, PersistableRecord {
+    static let databaseTableName = "expense"
+    static let category = belongsTo(CategoryRecord.self)
+
+    var id: String
+    var categoryID: String
+    var amount: Int64
+}
+```
+
+### When to Use Which Association
+
+| Association | Use when |
+|---|---|
+| `hasMany` | Parent owns multiple child records (Category → Expenses) |
+| `hasOne` | Parent owns exactly one child record (User → Profile) |
+| `belongsTo` | Child references a parent by foreign key (Expense → Category) |
+
+### Prefetch Variants
+
+| Variant | SQL behavior | When to use |
+|---|---|---|
+| `including(required:)` | INNER JOIN — excludes rows with no match | Always-present relationship (expense always has a category) |
+| `including(optional:)` | LEFT JOIN — includes rows even if no match | Nullable relationship (expense may have no tag) |
+| `including(all:)` | Two queries — parent + all children | `hasMany` collections; avoids cartesian product from JOIN |
+
+### Master-Detail Prefetch (Avoids N+1)
+
+```swift
+struct CategoryWithExpenses: FetchableRecord, Decodable {
+    var category: CategoryRecord
+    var expenses: [ExpenseRecord]
+}
+
+func fetchCategoriesWithExpenses() async throws -> [CategoryWithExpenses] {
+    try await dbManager.reader.read { db in
+        let request = CategoryRecord
+            .including(all: CategoryRecord.expenses)
+            .order(Column("name").asc)
+        return try CategoryWithExpenses.fetchAll(db, request)
+    }
+}
+```
+
+GRDB executes two queries for `including(all:)`: one for categories, one for all related expenses, then assembles the result in memory. This is O(N) — not N+1.
+
+### When to Prefer Raw SQL Over Associations
+
+Use raw SQL joins instead of GRDB associations when:
+- **Aggregates are needed** — `SUM`, `COUNT`, `AVG` across related rows (see Query Performance Rules)
+- **High-cardinality lists** — associations return full records; SQL can project only needed columns
+- **Complex filter conditions** — multi-table `WHERE` clauses that don't map cleanly to association predicates
+- **Performance-critical paths** — measure first; prefer associations for readability unless a query is provably slow

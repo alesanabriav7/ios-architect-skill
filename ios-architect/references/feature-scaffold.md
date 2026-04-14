@@ -696,6 +696,19 @@ struct {Entity}Sheet: View {
     }
 }
 
+### Liquid Glass Availability Gating
+
+If a feature adopts Liquid Glass styling, gate availability per component. Do not apply `glassEffect()` directly in feature views — delegate visual styling to ios-design-system components:
+
+```swift
+#if canImport(SwiftUI)
+@available(iOS 26.0, *)
+// Liquid Glass variant lives in the design system component, not here
+#endif
+```
+
+Feature views consume design system components; they never apply glass effects themselves. To add glass styling to a feature, invoke the `ios-design-system` skill.
+
 ## Screenshot Support
 
 If screenshots are requested or test scope includes UI/snapshot, also generate:

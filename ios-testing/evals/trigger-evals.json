@@ -1,0 +1,16 @@
+[
+  {"query": "Write unit tests for my ExpenseViewModel that loads expenses and handles errors", "should_trigger": true},
+  {"query": "Create a mock repository for my CategoryRepository so I can write isolated tests", "should_trigger": true},
+  {"query": "I'm getting data race warnings and Swift 6 Sendable errors — how do I fix them?", "should_trigger": true},
+  {"query": "Set up dependency injection in my app so I can swap repositories in tests", "should_trigger": true},
+  {"query": "Something crashes intermittently — I think it's a threading issue on a background queue", "should_trigger": true},
+  {"query": "Fix the actor isolation error I'm getting in my ViewModel", "should_trigger": true},
+  {"query": "Write integration tests for my GRDB repository to verify queries return the right data", "should_trigger": true},
+  {"query": "Add a new Expenses feature with Domain, Data, and Presentation layers", "should_trigger": false},
+  {"query": "Set up GRDB database migrations for my app", "should_trigger": false},
+  {"query": "Build a reusable button component for my design system", "should_trigger": false},
+  {"query": "Take a screenshot to verify the UI looks correct after my change", "should_trigger": false},
+  {"query": "Set up URLSession networking for my iOS app", "should_trigger": false},
+  {"query": "Help me build an Android app with Kotlin and Coroutines", "should_trigger": false},
+  {"query": "Explain how async/await works in Swift", "should_trigger": false}
+]

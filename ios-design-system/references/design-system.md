@@ -11,6 +11,10 @@ Use this file when creating shared UI primitives or feature UI components.
 - Prefer modern SwiftUI APIs (`foregroundStyle`, `clipShape(.rect(...))`, `Button` for tap actions).
 - If Liquid Glass is required, also apply `references/liquid-glass.md` for API, availability, and fallback rules.
 
+## Component Ownership
+
+A component belongs in the DesignSystem package if and only if it is used by 2 or more distinct feature modules. If it's used by 1 feature only, it stays in that feature's Presentation layer. Do not move single-use components to DesignSystem speculatively.
+
 ## Token System
 
 ### Semantic Color Template

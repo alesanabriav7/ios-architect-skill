@@ -1,0 +1,56 @@
+{
+  "skill_name": "ios-testing",
+  "baseline_note": "Every testing benchmark expects Swift Testing (import Testing), not XCTest. All mock repositories are actor-based. ViewModels under test are accessed on @MainActor. Never use @unchecked Sendable.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Write unit tests for an ExpenseViewModel that loads expenses from a repository and handles a network error",
+      "expected_output": "Swift Testing suite with @MainActor tests, actor-based mock repository, happy path and failure path",
+      "expectations": [
+        "Uses Swift Testing (import Testing) not XCTest",
+        "Mock repository is actor-based (actor MockExpenseRepository)",
+        "Includes a test verifying items load correctly on success",
+        "Includes a test verifying errorState is set when repository throws",
+        "Tests are annotated @MainActor or call ViewModel on main actor",
+        "Code is compile-ready Swift"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create a thread-safe mock for CategoryRepositoryProtocol that I can use across multiple test suites",
+      "expected_output": "Actor-based mock conforming to CategoryRepositoryProtocol with seed data and configurable error injection",
+      "expectations": [
+        "Mock is actor-based (actor MockCategoryRepository)",
+        "Conforms to the same protocol as the real repository",
+        "Supports seeding initial data in init",
+        "Supports injecting errors for failure-path tests",
+        "Does not use @unchecked Sendable",
+        "Code is compile-ready Swift"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "My ViewModel is getting Swift 6 Sendable and actor isolation errors — fix them without using @unchecked Sendable",
+      "expected_output": "Corrected code using @MainActor, Sendable protocols, and actors — no suppression hacks",
+      "expectations": [
+        "Annotates the ViewModel class with @MainActor (not just individual methods)",
+        "Marks repository protocols as Sendable",
+        "Does not use @unchecked Sendable anywhere",
+        "Uses actor or value types for any shared mutable state",
+        "Code is compile-ready Swift"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Set up constructor injection for ExpenseViewModel so tests can swap in a mock repository",
+      "expected_output": "ViewModel with protocol-driven init parameter, concrete default for production, injectable for tests",
+      "expectations": [
+        "ViewModel accepts repository via init parameter typed as the protocol",
+        "Production default uses the real repository implementation",
+        "No global singletons or static state used for DI",
+        "Includes a test showing mock injection",
+        "Code is compile-ready Swift"
+      ]
+    }
+  ]
+}

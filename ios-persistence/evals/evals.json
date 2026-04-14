@@ -1,0 +1,62 @@
+{
+  "skill_name": "ios-persistence",
+  "baseline_note": "Every persistence benchmark expects compile-ready GRDB code. No N+1 queries. All database access stays in the Data layer. Migrations are append-only and use versioned identifiers.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Set up a GRDB database with an initial migration for an Expense table with id, amount, date, and category fields",
+      "expected_output": "DatabaseManager with DatabasePool, registerMigrations with v1 migration defining the expense table",
+      "expectations": [
+        "Implements DatabaseManager with DatabasePool and a makeShared() factory",
+        "Registers a v1 migration with the expense table schema",
+        "Table has at least: id (text primary key), amount (integer or real), date (datetime), category (text)",
+        "Migration identifier is versioned (v1)",
+        "Code is compile-ready Swift"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Add a migration to attach tags to expenses — I want to store a list of tag names per expense",
+      "expected_output": "Append-only versioned migration (v2+) adding a tags table or JSON column without modifying v1",
+      "expectations": [
+        "Uses a new versioned migration identifier (v2 or higher)",
+        "Does not modify or re-register the existing v1 migration",
+        "Produces compile-ready Swift migration code"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "The expense list view should update automatically in real time whenever I add, edit, or delete an expense",
+      "expected_output": "ValueObservation in ViewModel with async for-in loop and Task lifecycle management",
+      "expectations": [
+        "Uses ValueObservation.tracking to observe the expense table",
+        "Iterates values with for try await inside a Task",
+        "Cancels the observation Task in deinit or a stopObserving() method",
+        "Code is compile-ready Swift"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Write a query that returns total amount spent per category for a given month — the app shows a summary chart",
+      "expected_output": "Single SQL query with GROUP BY and SUM mapped to a typed projection row — no Swift aggregation loops",
+      "expectations": [
+        "Uses a single SQL query with GROUP BY and SUM (or GRDB aggregate expression)",
+        "Does not issue one query per category (no N+1 pattern)",
+        "Maps results to a typed FetchableRecord projection struct",
+        "Code is compile-ready Swift"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Set up GRDB associations so I can fetch each Category with all of its Expenses in one efficient call",
+      "expected_output": "hasMany on CategoryRecord, belongsTo on ExpenseRecord, CategoryWithExpenses struct using including(all:)",
+      "expectations": [
+        "Defines hasMany association on CategoryRecord pointing to ExpenseRecord",
+        "Defines belongsTo association on ExpenseRecord pointing to CategoryRecord",
+        "Uses including(all: CategoryRecord.expenses) to prefetch in two queries (not N+1)",
+        "Defines a decodable CategoryWithExpenses struct",
+        "Code is compile-ready Swift"
+      ]
+    }
+  ]
+}

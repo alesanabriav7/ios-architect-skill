@@ -11,3 +11,40 @@
 
 # Plans
 plans/
+
+# Local AI tool directories (dev-time symlink targets — not canonical sources)
+.agents/
+.adal/
+.agent/
+.augment/
+.codebuddy/
+.commandcode/
+.continue/
+.crush/
+.factory/
+.goose/
+.iflow/
+.junie/
+.kilocode/
+.kiro/
+.kode/
+.mcpjam/
+.mux/
+.neovate/
+.openhands/
+.pi/
+.pochi/
+.qoder/
+.qwen/
+.roo/
+.trae/
+.vibe/
+.windsurf/
+.zencoder/
+
+# skills/ symlinks and lock (dev-time, point into .agents/)
+skills/
+skills-lock.json
+
+# Workspace iterations
+ios-architect-workspace/

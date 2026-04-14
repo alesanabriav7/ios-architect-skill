@@ -1,0 +1,53 @@
+{
+  "skill_name": "ios-platform",
+  "baseline_note": "Every platform benchmark expects Domain protocol + Data implementation separation. No URLSession, FoundationModels, or other platform framework imports in the Domain layer.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Set up a URLSession API client with token authentication and automatic refresh for my iOS app",
+      "expected_output": "APIClientProtocol in Domain, URLSessionAPIClient in Data, KeychainTokenProvider actor",
+      "expectations": [
+        "Defines APIClientProtocol in the Domain layer with no URLSession imports",
+        "Implements URLSessionAPIClient in the Data layer",
+        "Implements token refresh that retries the original request on 401",
+        "Token storage uses Keychain (not UserDefaults)",
+        "Code is compile-ready Swift"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Set up a typed navigation router with deep linking using a custom URL scheme for my iOS app",
+      "expected_output": "AppRouter (@Observable @MainActor), typed AppRoute enum, DeepLinkResolver, .onOpenURL wiring",
+      "expectations": [
+        "Defines a typed AppRoute enum with Hashable conformance",
+        "Implements AppRouter as an @Observable @MainActor class",
+        "Implements a DeepLinkResolver that maps URLs to typed AppRoute destinations",
+        "Wires .onOpenURL or .onContinueUserActivity at the app entry point",
+        "Code is compile-ready Swift"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Integrate Apple Foundation Models for on-device text summarization with a fallback when the feature is unavailable",
+      "expected_output": "Domain protocol with no FoundationModels imports, FoundationModels-backed implementation with runtime availability check, deterministic fallback",
+      "expectations": [
+        "Domain protocol has no FoundationModels imports",
+        "Implementation checks runtime availability before calling FoundationModels APIs",
+        "Provides a deterministic fallback path when Foundation Models is unavailable",
+        "FoundationModels imports are confined to the Data layer",
+        "Code is compile-ready Swift"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Create a privacy manifest for an iOS app that uses UserDefaults, location, and crash reporting",
+      "expected_output": "PrivacyInfo.xcprivacy with NSPrivacyAccessedAPITypes for UserDefaults and NSPrivacyCollectedDataTypes for location and crash data",
+      "expectations": [
+        "Generates a valid PrivacyInfo.xcprivacy XML or plist structure",
+        "Declares NSUserDefaults under NSPrivacyAccessedAPITypes with a valid reason code",
+        "Includes location data type under NSPrivacyCollectedDataTypes",
+        "Includes crash data / diagnostics type"
+      ]
+    }
+  ]
+}

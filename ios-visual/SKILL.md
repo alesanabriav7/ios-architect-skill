@@ -36,6 +36,7 @@ Always read `references/visual-qa.md`.
    - Full deterministic capture (App Store quality, preview data) → use `screenshots-ios` tool
    - Quick check of running simulator → use `xcrun simctl io booted screenshot`
    - Never assume the simulator is booted — check first
+   - If `screenshots-ios` is unavailable, fall back to `xcrun simctl io booted screenshot` immediately. Do not ask the user to install anything before attempting the fallback.
 
 3. **Analysis**: Read each captured PNG with the `Read` tool. Claude analyzes visually:
    - Layout shifts, misaligned elements, unexpected spacing

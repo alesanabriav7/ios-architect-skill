@@ -2,24 +2,22 @@
 
 Use this file for every request before generating files.
 
-## Build Type Prompt
+## Build Type
 
-Ask:
+Infer the build type from context — never ask. Resolve assumptions inline and proceed:
 
 1. New app from scratch
 2. New feature module
 3. New cross-domain shared service
 4. New cross-domain shared model
-5. New database migration
+5. New database migration → route to `ios-persistence` instead
 6. New local SPM package
 
-Then ask:
-
-- What is it called?
-- What does it do?
-- Which fields and behaviors are required?
-- Is it feature-owned or cross-domain shared? If shared, which 2+ features/domains consume it?
-- If fetching lists from a remote API, what pagination strategy is used (cursor / offset / full fetch)?
+For each, infer from context or state the assumption:
+- Name (PascalCase feature name)
+- Purpose (one sentence)
+- Ownership: feature-local (default) or cross-domain shared (if 2+ distinct consumers named)
+- Pagination strategy for remote list fetches: cursor / offset / full fetch (default: full fetch)
 
 ## Required Intake Fields
 
@@ -40,15 +38,15 @@ If the request is underspecified, state safe defaults and continue.
 
 ## Non-Interactive Fallback
 
-When the user's prompt already specifies enough detail, or when operating in a non-interactive context:
+Skip intake if the prompt contains ALL THREE: (1) what the feature is called, (2) what it does in one sentence, (3) where data comes from (local, remote, or both). If any is missing, infer from context and state the assumption inline, then proceed. Never wait for a reply.
 
-1. Do NOT ask intake questions and wait. Infer the build type from the prompt and state assumptions inline.
-2. Apply safe defaults for missing fields:
-   - Minimum deployment target: iOS 18.0
-   - Ownership: feature-local
-   - Data source: infer from prompt; default to in-memory if unclear
-   - Test scope: unit tests for ViewModel
-3. Proceed directly to code generation with all three layers (Domain, Data, Presentation).
+Apply safe defaults for missing fields:
+- Minimum deployment target: iOS 18.0
+- Ownership: feature-local
+- Data source: infer from prompt; default to in-memory if unclear
+- Test scope: unit tests for ViewModel
+
+Proceed directly to code generation with all three layers (Domain, Data, Presentation).
 
 ## Output Contract
 
@@ -93,6 +91,16 @@ Report:
 - Files created/updated
 - Checks executed and outcomes
 - Assumptions/defaults applied
+
+## Naming Conventions
+
+Apply these consistently across all generated code. Never mix conventions in one file. Placeholder values must be resolved before emitting code — no literal `{Feature}` in generated output.
+
+- `{AppName}` — PascalCase, the Tuist project name (e.g. `BudgetTracker`)
+- `{Feature}` — PascalCase, the feature module name (e.g. `Expense`, `Category`, `Settings`)
+- `{Entity}` — PascalCase, the domain model name (often same as Feature, but can differ; e.g. Feature `Expense`, Entity `ExpenseEntry`)
+- `{Prefix}` — same as `{AppName}`, used for shared package components (e.g. `{Prefix}DesignSystem`, `{Prefix}Card`, `{Prefix}TextField`)
+- `{app_name}` — snake_case version of AppName, used for file paths, database names, and CI scripts (e.g. `budget_tracker.sqlite`)
 
 ## Sister Skill Handoff Checklist
 

@@ -2,6 +2,27 @@
 
 Use this file for screenshot capture, visual regression, and pixel-perfect design comparison.
 
+## Prerequisites
+
+ios-architect must have already scaffolded the fixture/preview layer before ios-visual can run capture. Verify:
+
+- `Preview{Entity}Repository` exists in the Data layer
+- At least one JSON config file exists in `screenshots/`
+- The app entry point reads `APP_USE_PREVIEW_DATA` env var
+- `AppScreen` enum cases are defined and wired to `navigationPath`
+
+If any prerequisite is missing, invoke `ios-architect` to generate the screenshot scaffold first.
+
+## Tool Availability Check
+
+Before any capture, verify the primary tool is available:
+
+```bash
+which screenshots-ios || echo MISSING
+```
+
+If MISSING, fall back to `xcrun simctl io booted screenshot` immediately. Log which tool was used in your capture report.
+
 ## Capture Tools
 
 ### screenshots-ios (deterministic, production-quality)

@@ -1,74 +1,10 @@
 # Testing, Concurrency, and DI
 
-Use this file for Swift Testing patterns, mock repositories, DI wiring, concurrency rules, and performance guidance.
+Use this file for Swift Testing patterns, mock repositories, DI wiring, and performance guidance.
 
 ## Concurrency Rules
 
-- View models: `@Observable` + `@MainActor`.
-- Repository protocols: `Sendable`.
-- Repository implementations: `final class` + `Sendable`.
-- Shared mutable caches: `actor`.
-- Async work: `async/await` with `async throws`.
-- Avoid Combine and completion handlers for new code.
-- Prefer actors over `@unchecked Sendable` with manual synchronization.
-
-## Swift 6.2 Approachable Concurrency
-
-Swift 6.2 introduces `defaultIsolation` to reduce annotation noise. Adopt incrementally.
-
-### Module-Level Default Isolation
-
-Set `MainActor` as the default isolation for your app/feature modules in `Package.swift`:
-
-```swift
-.target(
-    name: "{AppName}",
-    dependencies: [...],
-    swiftSettings: [.defaultIsolation(MainActor.self)]
-)
-```
-
-With this setting, all types in the module are implicitly `@MainActor`. The explicit `@MainActor` annotation on ViewModels becomes optional (but harmless to keep for clarity).
-
-### `@concurrent` Attribute
-
-Use `@concurrent` to explicitly move async work off the main actor. This replaces the previous pattern of implicitly dispatching to the global concurrent executor:
-
-```swift
-@concurrent
-func fetchFromNetwork() async throws -> [Item] {
-    // Runs off the main actor even with defaultIsolation(MainActor.self)
-    let (data, _) = try await session.data(from: url)
-    return try decoder.decode([Item].self, from: data)
-}
-```
-
-### `nonisolated` Semantics in 6.2
-
-In Swift 6.2, `nonisolated` inherits the caller's actor context — it no longer implies "runs off-actor." To explicitly run off-actor, combine both:
-
-```swift
-@concurrent nonisolated
-func processData(_ input: Data) -> Result {
-    // Guaranteed to run off the calling actor
-}
-```
-
-Use plain `nonisolated` only for synchronous computed properties or protocol conformances where caller-context inheritance is correct.
-
-### Incremental Migration Path
-
-1. Enable `-strict-concurrency=complete` in Swift 5 language mode first.
-2. Fix all warnings (missing `Sendable`, data races, isolation gaps).
-3. Flip to Swift 6 language mode per module once warnings are resolved.
-4. Optionally add `defaultIsolation(MainActor.self)` to reduce annotation noise in UI-heavy modules.
-
-### Caution: `@unchecked Sendable`
-
-Avoid `@unchecked Sendable` — it silences the compiler without guaranteeing safety. Prefer:
-- `actor` for types with mutable shared state.
-- `@MainActor` for UI-bound types.
-- Value types (`struct`, `enum`) which are implicitly `Sendable` when all stored properties are `Sendable`.
+Concurrency rules are defined in `ios-architect/references/testing-concurrency-di.md`. Apply those rules here. The canonical source is that file.
 
 ## Dependency Injection Pattern
 
@@ -283,6 +219,61 @@ actor MockDeepLinkResolver: DeepLinkResolverProtocol {
     }
 }
 ```
+
+## View Testing
+
+Write view tests for critical user-facing state transitions, not for layout or visual details (leave those to ios-visual).
+
+### When to Write View Tests vs. ViewModel Tests
+
+- **ViewModel tests**: logic, state changes, async flows, error handling — cover these first.
+- **View tests**: write only when the view has conditional rendering that a ViewModel test cannot cover, or when a navigation trigger (sheet presentation, navigation push) must be verified at the view level.
+
+### Testing Navigation Triggers
+
+Test sheet presentation and navigation push through ViewModel state — not by inspecting the SwiftUI view hierarchy:
+
+```swift
+import Testing
+@testable import {AppName}
+
+@Suite("{Feature} Navigation Tests")
+struct {Feature}NavigationTests {
+    @Test("presents new sheet on FAB tap")
+    @MainActor
+    func tapFAB_presentsSheet() async throws {
+        let vm = {Feature}ViewModel(repository: Mock{Entity}Repository())
+        vm.presentNewSheet()
+        #expect(vm.activeSheet == .new)
+    }
+
+    @Test("dismisses sheet after save")
+    @MainActor
+    func save_dismissesSheet() async throws {
+        let repo = Mock{Entity}Repository()
+        let vm = {Feature}ViewModel(repository: repo)
+        vm.activeSheet = .new
+        // The form VM receives a callback — save() must invoke it to pass this test.
+        let formVM = {Entity}FormViewModel(
+            repository: repo,
+            onSave: { [weak vm] in vm?.activeSheet = nil }
+        )
+        formVM.title = "Test"
+        try await formVM.save()
+        #expect(vm.activeSheet == nil)
+    }
+}
+```
+
+### What NOT to Test in Views
+
+- Layout specifics (padding values, frame sizes) — belongs in ios-visual
+- Colors, fonts, or spacing tokens — belongs in ios-visual
+- Pixel-level appearance — belongs in ios-visual
+
+### Integration with ios-visual
+
+View tests verify behavioral correctness (is the right sheet presented?). ios-visual verifies visual correctness (does it look right?). Both are needed for a complete quality gate.
 
 ## Minimal Test Coverage Expectations
 

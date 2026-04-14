@@ -6,6 +6,21 @@ Use this file when the user requests screenshot capture, visual regression testi
 
 Automated screenshots capture every screen in the app for visual regression testing. The `AppScreen` manifest (see `navigation.md` in the `ios-platform` skill) is the single source of truth for what screens exist. `PreviewFixture` data (see `feature-scaffold.md`) ensures every capture is deterministic — same data, same layout, every run.
 
+## What ios-architect Generates
+
+When screenshots are in scope (intake specifies "UI/snapshot" test scope or screenshots are requested), ios-architect generates these artifacts before handing off to ios-visual:
+
+| Artifact | Location | Description |
+|---|---|---|
+| `Preview{Entity}Repository` | `Features/{Feature}/Data/` | In-memory repository seeded from `{Entity}.fixtures` |
+| JSON config files | `screenshots/` | One per `AppScreen` case; each has `scheme`, `screenshotName`, `outputDir`, `launchEnv` |
+| `APP_USE_PREVIEW_DATA` hook | App entry point | Reads env var to switch to preview repositories |
+| `SCREENSHOT_SCREEN` env var hook | `TabRootView.applyScreenshotHook()` | Jumps directly to target screen on launch |
+| `PreviewFixture` conformance | Domain models | Fixed IDs and fixed dates for deterministic output |
+| `screenshots/capture-all.sh` | `screenshots/` | Batch script that iterates all JSON configs |
+
+**ios-visual depends on these artifacts.** It captures and analyzes — it does not generate fixtures, configs, or env var hooks. If any artifact is missing, ios-architect must scaffold it first.
+
 ## App-Side Wiring Contract
 
 The app must support two environment variables so external capture tools can drive it:

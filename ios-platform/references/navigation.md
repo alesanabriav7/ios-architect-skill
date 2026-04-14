@@ -2,6 +2,16 @@
 
 Use this file when setting up app navigation, deep linking, or multi-column layouts.
 
+## Prerequisites
+
+This skill handles routing implementation, not app structure decisions. App structure must be decided before generating the router:
+
+- **TabView**: 3–5 distinct top-level sections, each with independent navigation history
+- **NavigationSplitView**: iPad-first, content browser with detail pane
+- **Single NavigationStack**: linear flows, onboarding, simple apps
+
+If the user hasn't decided yet, ask which structure fits before generating the router.
+
 ## NavigationStack with Typed Route Stack
 
 Centralize navigation state in a single observable router using a typed `[AppRoute]` array instead of the type-erased `NavigationPath`. This enables stack introspection for deep links, screenshot automation, and test assertions. All push/pop operations go through this object.

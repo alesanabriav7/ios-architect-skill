@@ -1,11 +1,12 @@
 ---
 name: ios-platform
 description: >
-  Use when someone needs to connect the app to a backend, set up navigation infrastructure,
-  handle platform compliance, or add on-device AI. This covers: calling a REST or GraphQL
-  API, handling authentication and token refresh, setting up URLSession, implementing deep
-  links, building iPad split-view layouts, adding Foundation Models for on-device AI, and
-  App Store privacy manifests. The user might say "call this API", "handle token refresh",
+  ONLY for infrastructure tasks — not for feature scaffolding. Use when someone needs to
+  connect the app to a backend, set up navigation infrastructure, handle platform
+  compliance, or add on-device AI. This covers: calling a REST or GraphQL API, handling
+  authentication and token refresh, setting up URLSession, implementing deep links,
+  building iPad split-view layouts, adding Foundation Models for on-device AI, and App
+  Store privacy manifests. The user might say "call this API", "handle token refresh",
   "set up deep links", "add on-device AI", "I need a privacy manifest", or "build the
   iPad layout with a sidebar". Not for: building the feature's Domain/Data/Presentation
   layers (ios-architect), storing data locally (ios-persistence), or UI components

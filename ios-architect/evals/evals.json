@@ -1,6 +1,6 @@
 {
   "skill_name": "ios-architect",
-  "baseline_note": "Every feature benchmark implicitly expects Domain (model + repository protocol), Data (repository impl), and Presentation (ViewModel @Observable + SwiftUI View). Expectations below test only what is unique to each scenario.",
+  "baseline_note": "Every feature benchmark implicitly expects Domain (model + repository protocol), Data (repository impl), and Presentation (ViewModel @Observable @MainActor + SwiftUI View). Expectations below test only what is unique to each scenario.",
   "evals": [
     {
       "id": 1,
@@ -54,11 +54,13 @@
     },
     {
       "id": 6,
-      "prompt": "I need to add an avatar URL field to the Users table in my app's database",
-      "expected_output": "GRDB versioned migration adding the column via DatabaseMigrator",
+      "prompt": "Add a Notifications feature to my app that fetches notification history from the API and caches it so it works without internet",
+      "expected_output": "Feature with Domain/Data/Presentation layers, API repository, and local cache or GRDB storage for offline access",
       "expectations": [
-        "Uses GRDB DatabaseMigrator with a versioned migration identifier",
-        "Produces compile-ready Swift migration code that adds a column"
+        "Creates a notification domain model and repository protocol",
+        "Implements a repository that fetches from API and caches or persists results locally",
+        "Generates a ViewModel (@Observable @MainActor) and SwiftUI view",
+        "No GRDB types leak into the Domain layer"
       ]
     },
     {

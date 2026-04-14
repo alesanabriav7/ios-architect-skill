@@ -1,0 +1,18 @@
+[
+  {"query": "Create a design token system with spacing, colors, and typography for my iOS app", "should_trigger": true},
+  {"query": "Build a reusable card component that multiple features in my app can share", "should_trigger": true},
+  {"query": "Add Liquid Glass styling to my navigation bar for iOS 26+", "should_trigger": true},
+  {"query": "Set up dark mode support with semantic color tokens across my app", "should_trigger": true},
+  {"query": "Create a loading skeleton view for my content lists", "should_trigger": true},
+  {"query": "Update the typography scale to use a custom font with Dynamic Type support", "should_trigger": true},
+  {"query": "Build a reusable amount input field that multiple features will use", "should_trigger": true},
+  {"query": "Create a new feature module for user profiles with Domain/Data/Presentation layers", "should_trigger": false},
+  {"query": "Set up URLSession networking with token authentication", "should_trigger": false},
+  {"query": "Add a GRDB migration to create a Tags table in my database", "should_trigger": false},
+  {"query": "Write tests for my iOS components", "should_trigger": false},
+  {"query": "Build a Node.js backend API with Express", "should_trigger": false},
+  {"query": "Scaffold a new iOS app with Clean Architecture and GRDB", "should_trigger": false},
+  {"query": "Build a settings view for my Settings feature", "should_trigger": false},
+  {"query": "Take a screenshot to verify my design looks correct", "should_trigger": false},
+  {"query": "Set up deep linking for my iOS app", "should_trigger": false}
+]
