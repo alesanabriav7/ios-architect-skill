@@ -19,6 +19,17 @@ For each, infer from context or state the assumption:
 - Ownership: feature-local (default) or cross-domain shared (if 2+ distinct consumers named)
 - Pagination strategy for remote list fetches: cursor / offset / full fetch (default: full fetch)
 
+## Project Settings Detection
+
+Run this step when the request involves existing code, concurrency patterns, or Swift 6 migration. Skip for greenfield apps — defaults apply.
+
+Check these locations:
+
+- `Package.swift`: `swiftLanguageVersions`, `.enableExperimentalFeature("StrictConcurrency")`, `.defaultIsolation(MainActor.self)`, platform deployment target
+- Xcode build settings: `SWIFT_VERSION` (Swift Language Version), `SWIFT_STRICT_CONCURRENCY` (Strict Concurrency Checking), `IPHONEOS_DEPLOYMENT_TARGET`
+
+If the file is not accessible or the context is non-interactive, state the assumption explicitly and proceed. Never silently assume a concurrency or language version setting.
+
 ## Required Intake Fields
 
 Capture this checklist in short form:

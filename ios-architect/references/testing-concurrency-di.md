@@ -14,6 +14,26 @@ Use this file for quality gates, thread-safety, and dependency wiring.
 - Avoid Combine and completion handlers for new code.
 - Prefer actors over `@unchecked Sendable` with manual synchronization.
 
+## Concurrency Tool Selection Guide
+
+| Tool | Use when | Avoid when |
+|---|---|---|
+| `async/await` | Sequential async work; one result needed | No async context available |
+| `async let` | 2–3 independent async calls in the same scope | More than 3 (use `withTaskGroup` instead) |
+| `withTaskGroup` | Dynamic or N parallel tasks; results collected | Tasks have side-effects only (use `TaskGroup<Void>`) |
+| `Task { }` | Fire async work from sync context (button tap, `.onAppear`) | Long chains — prefer structured concurrency |
+| `actor` | Shared mutable state accessed from multiple contexts | Read-only state (use `struct` instead) |
+| `@MainActor` | UI-bound types and functions; ViewModels | Background work — it blocks the main thread |
+| `@concurrent` (Swift 6.2) | Explicit off-actor async functions in `MainActor`-default modules | Swift < 6.2 targets |
+
+## Anti-Patterns
+
+- **Don't blanket `@MainActor`**: Annotating everything `@MainActor` to silence warnings couples all async work to the main thread. Fix isolation instead.
+- **Don't use `Task.detached` without a reason**: Detached tasks lose actor context and structured cancellation. Use `Task { }` (inherits context) unless you explicitly need to escape the current actor.
+- **Don't `@unchecked Sendable` your way through**: It tells the compiler you know what you're doing — and you probably don't. Fix the isolation boundary instead.
+- **Don't assert immediately after `Task { }` creation**: The task hasn't run yet. Use `confirmation` from Swift Testing or `await` the task result directly.
+- **Don't fix multiple unrelated concurrency warnings in one commit**: Isolation fixes compound — one change can reveal hidden issues elsewhere. Fix one category, build, verify, then proceed.
+
 ## Swift 6.2 Approachable Concurrency
 
 Swift 6.2 introduces `defaultIsolation` to reduce annotation noise. Adopt incrementally.
