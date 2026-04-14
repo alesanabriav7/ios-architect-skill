@@ -75,6 +75,19 @@ func save() async {
 
 A top-level enum for errors that cross feature boundaries (auth expired, no network). ViewModels catch domain errors and map to `AppError` only when routing or global alerts are needed.
 
+`NetworkError` is defined in `ios-platform/references/networking.md` (Error Handling section). Reproduced here for context:
+
+```swift
+enum NetworkError: Error, Sendable, Equatable {
+    case unauthorized
+    case notFound
+    case serverError(Int)
+    case noConnection
+    case decodingFailed(String)
+    case unexpected(String?)
+}
+```
+
 ```swift
 enum AppError: Error, Equatable, Sendable {
     case network(NetworkError)
