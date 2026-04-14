@@ -253,10 +253,13 @@ struct {Feature}NavigationTests {
         let repo = Mock{Entity}Repository()
         let vm = {Feature}ViewModel(repository: repo)
         vm.activeSheet = .new
-        let formVM = {Entity}FormViewModel(repository: repo)
+        // The form VM receives a callback — save() must invoke it to pass this test.
+        let formVM = {Entity}FormViewModel(
+            repository: repo,
+            onSave: { [weak vm] in vm?.activeSheet = nil }
+        )
         formVM.title = "Test"
         try await formVM.save()
-        vm.activeSheet = nil
         #expect(vm.activeSheet == nil)
     }
 }
