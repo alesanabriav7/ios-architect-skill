@@ -36,6 +36,36 @@ If the request involves concurrency, Sendable, or actor isolation: also read `io
 5. Test data factories use `make{Entity}()` helpers with overridable defaults.
 6. Run targeted tests to validate: `swift test --filter <TestSuite>`.
 
+## Project Settings Check
+
+Before diagnosing any concurrency or Sendable issue, read the project's concurrency configuration:
+
+- `Package.swift` — look for `swiftLanguageVersions`, `.enableExperimentalFeature("StrictConcurrency")`, `.defaultIsolation(MainActor.self)`
+- Xcode build settings — look for **Swift Language Version** and **Strict Concurrency Checking**
+- If settings cannot be read, state the assumption explicitly before proceeding (e.g. "Assuming Swift 5 with no strict concurrency enabled")
+
+## Concurrency Diagnostics
+
+| Symptom | Root Cause | Smallest Fix | Guardrail |
+|---|---|---|---|
+| "Sending X risks causing data races" | Isolation boundary crossed — reference type sent between actors | Move to actor, or make value type (`struct`) | Don't add `@unchecked Sendable` to silence it |
+| "Expression is 'async' but is not marked with 'await'" | Async call missing `await` | Add `await` at the call site | Don't wrap in a new `Task` just to avoid `await` |
+| "Call to main actor-isolated … from nonisolated context" | UI code called off `@MainActor` | Annotate caller with `@MainActor` or use `Task { @MainActor in … }` | Don't use `DispatchQueue.main.async` — defeats Swift concurrency |
+| "Type X does not conform to Sendable" | Reference type crossing actor boundary | Make `Sendable` (immutable struct/final class), use `actor`, or value type | Don't reach for `@unchecked Sendable` first |
+| "Stored property 'X' of Sendable-conforming class is mutable" | Mutable stored property in `Sendable` type | Make `let`, use `actor`, or `nonisolated(unsafe)` only if provably safe | Don't use `nonisolated(unsafe)` as default escape hatch |
+| Flaky async test (timing-dependent) | Asserting after `Task` creation before it runs | Use `confirmation` or `await` the result directly | Don't use `sleep` or `Task.yield` to stabilize timing |
+
+## Migration Validation Loop
+
+When migrating to stricter concurrency (Swift 5 → Swift 6 or enabling strict concurrency):
+
+1. Enable `-strict-concurrency=complete` in Swift 5 mode first — do not flip to Swift 6 yet
+2. Fix one diagnostic category at a time (isolation, Sendable, etc.) — not all at once
+3. Run `swift build` after each category to confirm no regressions introduced
+4. Run `swift test --filter <Suite>` to verify test behavior is unchanged
+5. Only switch to Swift 6 language mode per module once all warnings are resolved
+6. Never batch unrelated concurrency fixes in a single step
+
 ## Sister Skills
 
 - **ios-architect** — app/feature scaffolding, Domain/Data/Presentation layers
