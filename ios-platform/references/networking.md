@@ -320,13 +320,19 @@ actor KeychainTokenProvider: TokenProviderProtocol {
 ```swift
 @main
 struct {AppName}App: App {
-    private let tokenProvider = KeychainTokenProvider(
-        refreshURL: URL(string: "{baseURL}/auth/refresh")!
-    )
-    private lazy var apiClient: APIClientProtocol = URLSessionAPIClient(
-        baseURL: URL(string: "{baseURL}")!,
-        tokenProvider: tokenProvider
-    )
+    private let tokenProvider: KeychainTokenProvider
+    private let apiClient: APIClientProtocol
+
+    init() {
+        let provider = KeychainTokenProvider(
+            refreshURL: URL(string: "{baseURL}/auth/refresh")!
+        )
+        tokenProvider = provider
+        apiClient = URLSessionAPIClient(
+            baseURL: URL(string: "{baseURL}")!,
+            tokenProvider: provider
+        )
+    }
 }
 ```
 
