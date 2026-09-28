@@ -1,159 +1,46 @@
 # ios-architect-skill
 
-A multi-skill toolkit for scaffolding modern iOS apps with Clean Architecture, MVVM, SwiftUI, GRDB, Swift Concurrency, and modular local packages.
+Two agent skills for iOS work in Swift 6 and SwiftUI:
 
-Works with any LLM-powered coding agent.
+- **ios-architect**: features and apps with Clean Architecture (Domain/Data/Presentation), GRDB, networking,
+  navigation and deep links, Foundation Models, design tokens, Swift Testing, and Swift Concurrency.
+- **ios-visual**: deterministic simulator screenshots, visual regression, and design comparison.
 
-## Who Is This For?
-
-iOS developers who want to scaffold new apps or features following strict Clean Architecture boundaries with feature-local ownership, GRDB persistence, and modern Swift APIs.
+The skill text is short: guardrails plus pointers. The code it points to lives in `ios-architect/templates/`,
+a Tuist app (iOS 26, Swift 6, GRDB) that builds and passes its tests, so the examples are compiled code, not prose.
 
 ## Install
-
-### Option A — Skills CLI
 
 ```bash
 npx skills add https://github.com/alesanabriav7/ios-architect-skill
 ```
 
-### Option B — Claude Code Plugin Marketplace
+Or copy `ios-architect/` and `ios-visual/` into `.claude/skills/`.
 
-```
-/plugin marketplace add ios-architect
-```
-
-### Option C — Manual
-
-Clone the repo and copy the skill directories into your project's `.claude/skills/` folder:
+## Verify the templates
 
 ```bash
-git clone https://github.com/alesanabriav7/ios-architect-skill.git
-cp -r ios-architect-skill/ios-architect .claude/skills/
-cp -r ios-architect-skill/ios-design-system .claude/skills/
-cp -r ios-architect-skill/ios-platform .claude/skills/
-cp -r ios-architect-skill/ios-persistence .claude/skills/
-cp -r ios-architect-skill/ios-testing .claude/skills/
-cp -r ios-architect-skill/ios-visual .claude/skills/
+ios-architect/scripts/verify-templates.sh            # default simulator: iPhone 17 Pro
+ios-architect/scripts/verify-templates.sh "iPhone 17"
 ```
 
-## Skills
+The script runs `tuist install`, `tuist generate`, and `xcodebuild test` twice: once with default isolation,
+and once with `SWIFT_DEFAULT_ACTOR_ISOLATION=MainActor` plus approachable concurrency. It needs Xcode 26+, Tuist 4, and an iOS 26+ simulator.
+Run it after any change under `templates/`.
 
-### ios-architect
-
-Scaffold apps and features with Clean Architecture (Domain/Data/Presentation), MVVM, GRDB, and Swift Concurrency.
-
-- New app scaffolding — Tuist project, Clean Architecture layers, GRDB database, and test targets
-- Feature scaffolding — Domain models, repository protocols/implementations, view models, SwiftUI views
-- Database & migrations — GRDB schema migrations with versioned migrators
-- Error taxonomy — typed domain errors with propagation patterns
-
-### ios-design-system
-
-Design tokens, reusable components, theming, and accessibility.
-
-- Design tokens — Spacing, color, radius, and typography scales
-- Components — Reusable SwiftUI components with accessibility built in
-- Theming — Light/dark mode color palettes
-- Liquid Glass — iOS 26+ styling with version-gated fallbacks
-
-### ios-platform
-
-Networking, navigation, privacy compliance, and on-device AI integration.
-
-- Networking — URLSession API clients with async/await, retry, and offline-first
-- Navigation — Type-safe routing with deep linking support
-- Privacy & compliance — Privacy manifests, account deletion flows
-- Foundation Models — On-device AI with runtime availability checks
-
-### ios-persistence
-
-Focused GRDB operations without full feature scaffolding.
-
-- Schema setup — DatabaseManager, migrations, table definitions
-- Queries — Fetch, insert, update, delete with proper Data-layer isolation
-- ValueObservation — Auto-updating queries for reactive UI
-- Local caching — API response and image caching patterns
-
-### ios-testing
-
-Tests, mocks, concurrency fixes, and dependency injection — not feature building.
-
-- Unit & integration tests — Swift Testing with compile-ready assertions
-- Mocks — Actor-based fake implementations for repositories and services
-- Concurrency — Sendable conformance, actor isolation, Swift 6 fixes
-- DI wiring — Dependency injection setup for testability
-
-### ios-visual
-
-Screenshot capture and visual regression against designs or references.
-
-- Simulator screenshots — Capture any screen via `simctl`
-- Visual diff — Compare current UI against a reference image using Claude vision
-- Layout validation — Detect broken spacing, clipped content, or misaligned elements
-- Pre-merge regression — Catch visual regressions before merging a PR
-
-## Skill Structure
+## Layout
 
 ```
 ios-architect/
-├── SKILL.md
-└── references/
-    ├── intake.md
-    ├── new-app-scaffold.md
-    ├── feature-scaffold.md
-    ├── database-and-migrations.md
-    ├── testing-concurrency-di.md
-    ├── error-taxonomy.md
-    └── screenshots.md
-
-ios-design-system/
-├── SKILL.md
-└── references/
-    ├── design-system.md
-    └── liquid-glass.md
-
-ios-platform/
-├── SKILL.md
-└── references/
-    ├── networking.md
-    ├── navigation.md
-    ├── privacy-and-compliance.md
-    └── foundation-models.md
-
-ios-persistence/
-├── SKILL.md
-└── references/
-    └── persistence.md
-
-ios-testing/
-├── SKILL.md
-└── references/
-    └── testing.md
-
+  SKILL.md              guardrails and a map to the templates
+  references/           persistence, concurrency and testing, platform, UI, new app
+  templates/            the compiled reference app and its tests
+  scripts/              verify-templates.sh
+  evals/                behavioral evals (run results in evals/README.md)
 ios-visual/
-├── SKILL.md
-└── references/
-    └── visual-qa.md
+  SKILL.md
 ```
-
-## Usage
-
-Tell your AI assistant:
-
-> Create a new iOS app called BudgetTracker with expense tracking and categories.
-
-> Add a Favorites feature to my iOS app with local GRDB persistence.
-
-> Build a reusable card component with Liquid Glass styling.
-
-> Set up URLSession networking with token refresh for my iOS app.
-
-> Add a column for avatarURL to the users table.
-
-> Write tests for my ExpenseViewModel.
-
-> Does the home screen match my Figma design?
 
 ## License
 
-[MIT](LICENSE)
+MIT

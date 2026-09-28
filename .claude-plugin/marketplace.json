@@ -5,19 +5,18 @@
     "email": "alesanabriav@gmail.com"
   },
   "metadata": {
-    "description": "iOS app scaffolding with Clean Architecture, SwiftUI, GRDB, and Swift Concurrency.",
-    "version": "1.0.0"
+    "description": "iOS skills: Clean Architecture features with compiled templates, and simulator visual QA.",
+    "version": "2.0.0"
   },
   "plugins": [
     {
       "name": "ios-skills",
-      "description": "Scaffold iOS apps and features with Clean Architecture, design systems, networking, navigation, privacy, and on-device AI.",
+      "description": "Build iOS features with Clean Architecture, GRDB, and Swift Concurrency from compiled templates; capture and compare simulator screenshots.",
       "source": "./",
       "strict": false,
       "skills": [
         "./ios-architect",
-        "./ios-design-system",
-        "./ios-platform"
+        "./ios-visual"
       ]
     }
   ]

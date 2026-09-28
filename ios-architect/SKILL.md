@@ -1,103 +1,65 @@
 ---
 name: ios-architect
 description: >
-  Use when someone is building something new in iOS or organizing existing code into
-  proper structure. This covers: creating a new app from scratch, adding a new feature
-  or screen, making a feature work offline end-to-end, splitting messy code into layers,
-  creating a shared service used by multiple features, or setting up the project skeleton.
-  The user might say "create a feature for X", "add a screen that does Y", "how should I
-  structure this?", "build an app that tracks Z", "add offline support to this feature",
-  "I want the app to work without internet", or "split this into proper layers". Use this
-  even if they don't mention architecture — if they want to add or reorganize functionality
-  at the feature level, this is the right skill. Not for: isolated DB queries or column
-  changes (ios-persistence), writing tests only (ios-testing), visual UI checks
-  (ios-visual), or API client setup (ios-platform).
-license: MIT
-allowed-tools: Read Bash(tuist:*) Bash(swift:*)
-metadata:
-  author: alesanabriav7
-  version: "1.0.0"
+  Builds and changes iOS Swift 6/SwiftUI code: features, Clean Architecture layers, GRDB migrations
+  and queries, API clients, deep links, Foundation Models, privacy manifests, design tokens, Liquid Glass,
+  Swift Testing, and Sendable or actor-isolation errors. Not for simulator screenshots (ios-visual).
 ---
 
 # iOS Architect
 
-Keep token usage low by loading only the references needed for the current request.
+## 1. The existing project wins
 
-## Load Strategy
+The user's instructions come first, then the repo's conventions, then this skill. If they conflict, say which line of this skill you're setting aside.
+Before writing code in an existing repo, read its `AGENTS.md`/`CLAUDE.md` and the closest existing feature.
+Its conventions (DI, naming, tokens, file layout, build/test/lint commands) override everything below.
+Use `templates/` only where the repo has no precedent, and adapt it to the repo's names.
 
-1. Always read `references/intake.md` first.
-2. Read only the references relevant to the build type:
+## 2. Verified templates
 
-### New app from scratch
+`templates/` is a Tuist app (iOS 26, Swift 6) that builds and passes its tests in both default and
+MainActor-by-default isolation. Read the file for the concern at hand. Copy the pattern, not the `Note` names.
 
-- `references/new-app-scaffold.md`
-- `references/feature-scaffold.md`
-- `references/database-and-migrations.md`
-- `references/testing-concurrency-di.md`
-- `references/error-taxonomy.md`
-- If screenshots or UI/snapshot testing: `references/screenshots.md`
+| Concern | Files (under `templates/`) |
+|---|---|
+| Feature slice | `App/Sources/Features/Notes/{Domain,Data,Presentation}/` |
+| Database, migrations | `App/Sources/Core/Database/AppDatabase.swift`, `App/Tests/AppDatabaseTests.swift` |
+| Live list (ValueObservation → view model) | `GRDBNoteRepository.swift`, `NotesViewModel.swift`, `NotesView.swift` |
+| API client, token refresh, Keychain | `App/Sources/Core/Networking/`, `App/Tests/APIClientTests.swift` |
+| Deep links, navigation, launch options | `App/Sources/App/Router.swift`, `SampleApp.swift`, `App/Tests/RoutingTests.swift` |
+| Composition root, preview data | `App/Sources/App/AppEnvironment.swift`, `NoteFixtures.swift` |
+| Screenshot launch contexts (for `ios-visual`) | `screenshots/*.json` |
+| Foundation Models with fallback | `FoundationModelsTitleSuggester.swift` |
+| Design tokens, shared component | `DesignSystem/Sources/` |
+| Tuist project | `Project.swift`, `Tuist.swift`, `Tuist/Package.swift` |
 
-### New feature
+## 3. Guardrails
 
-- `references/feature-scaffold.md`
-- `references/error-taxonomy.md`
-- If persistence changes: `references/database-and-migrations.md`
-- If tests/concurrency concerns: `references/testing-concurrency-di.md`
-- If screenshots or UI/snapshot testing: `references/screenshots.md`
+- **Domain**: models and protocols, Foundation only. **Data**: GRDB, URLSession, FoundationModels, Keychain.
+  **Presentation**: SwiftUI views and `@MainActor @Observable` view models. Framework types never cross into Domain.
+- Code belongs to the feature that uses it. Move it to `Shared/<Capability>/` only once two features consume it.
+  Never create `Shared/Models`, `Shared/Data`, or other catch-all folders.
+- One composition root picks concrete implementations. No singletons, and no default arguments that open the database.
+- Create only the layers the task needs. A service with no UI gets no view.
+- Every screen needs loading, empty, error, and long-text states. User-facing errors are localized messages, never `error.localizedDescription`.
 
-### New cross-domain shared service or model
+Read the reference for the area you are touching:
 
-- `references/testing-concurrency-di.md`
-- If DB-backed: `references/database-and-migrations.md`
+- GRDB, migrations, queries, caching, offline → `references/persistence.md`
+- Concurrency errors, isolation, tests and fakes → `references/concurrency-and-testing.md`
+- Networking, auth, deep links, navigation, Foundation Models, privacy → `references/platform.md`
+- Design system, components, Liquid Glass, accessibility, localization → `references/ui.md`
+- New app from scratch → `references/new-app.md`
 
-### New database migration
+## 4. Prove it
 
-→ Use the `ios-persistence` skill directly.
-
-### New local SPM package
-
-- `references/new-app-scaffold.md`
-- `references/testing-concurrency-di.md`
-
-Do not bulk-load all references when the task is narrow.
-
-### Cross-Skill Handoffs
-
-- **ios-design-system**: invoke when the request mentions a reusable UI component (used by 2+ features), a color/spacing token, theming, or Liquid Glass. Do NOT invoke for a one-off view inside a feature.
-- **ios-persistence**: invoke when the request is ONLY about a migration, query optimization, or ValueObservation setup with no Domain/Data/Presentation changes. If Domain/Data layers change alongside persistence, ios-architect handles it and loads `database-and-migrations.md` itself.
-- **ios-platform**: invoke when the request is ONLY about the API client, navigation router overhaul, privacy manifest, or Foundation Models integration. Feature scaffolding (Domain/Data/Presentation) stays in ios-architect even if networking is involved.
-- **ios-testing**: invoke when the request is ONLY about writing or fixing tests, mocks, or actor isolation errors, with no new feature scaffolding.
-- **ios-visual**: invoke when the request involves screenshots, visual regression, or design comparison.
-
-## Shared Placement Rule
-
-- Default all model/repository/view-model ownership to the feature that uses it.
-- Use `Shared` only for true cross-domain capabilities consumed by at least two domains/features (e.g. Settings).
-- Keep shared capabilities domain-scoped (`Shared/Settings/...`) with their own Domain/Data/Presentation split.
-- Never create catch-all buckets such as `Shared/Models` or `Shared/Data`.
-
-## Execution Contract
-
-1. Run intake first (build type, name, flow, fields, data source, integrations, test scope).
-   - If the user does not answer intake questions (e.g., non-interactive context), state safe defaults and proceed to generation immediately. Never stop at intake.
-2. Generate ALL three layers for every feature — Domain, Data, AND Presentation:
-   - **Domain** — model struct(s) + repository protocol
-   - **Data** — repository implementation (+ records if persistence is used)
-   - **Presentation** — at least one ViewModel (`@Observable @MainActor`) AND at least one SwiftUI View that consumes it
-   - Skipping the Presentation layer is never acceptable. Every feature must have a working View + ViewModel.
-   - Keep each layer in the owning feature by default; only promote to shared for proven cross-domain reuse.
-3. If screenshots are in scope, generate the full JSON config and env var router hook (one JSON file per `AppScreen` case, plus `APP_USE_PREVIEW_DATA` env var at the app entry point) before handing off to ios-visual.
-4. For new-app scaffolds: generate Tuist config AND app code (entry point, root navigation, first feature with all three layers) in the same response. Never stop after emitting only project configuration files.
-5. Use modern APIs (`@Observable`, `@MainActor`, Swift Concurrency, Swift Testing).
-6. Validate generated output:
-   - New Tuist app: `tuist generate` + one build
-   - Feature/module changes: targeted build/tests
-7. Report created files, validations run, and assumptions.
-
-## Sister Skills
-
-- **ios-design-system** — design tokens, UI components, Liquid Glass styling
-- **ios-platform** — networking, navigation, privacy, Foundation Models
-- **ios-persistence** — GRDB setup, migrations, ValueObservation
-- **ios-testing** — Swift Testing, mock repositories, DI, concurrency
-- **ios-visual** — visual regression, pixel-perfect comparison, UI error detection
+- Build and test with the repo's own commands. With a Tuist/Xcode app, use
+  `xcodebuild test -workspace <X>.xcworkspace -scheme <X> -destination 'platform=iOS Simulator,name=<device>'`;
+  `swift test` only works for Swift packages.
+- Test the behavior at risk: migrations (run twice, upgrade existing rows), queries, and async or concurrent code (no sleeps).
+  Skip tests that only restate the implementation.
+- Read `git diff` before reporting. Generators (`tuist generate`) can rewrite committed project files, for example resetting
+  version and build numbers. Revert whatever the task didn't ask to change.
+- For visible UI changes, capture the affected screens with `ios-visual`.
+- Report the commands you ran and their results. Code is not "compile-ready" until it has been built.
+- After editing `templates/`, run `scripts/verify-templates.sh`. It needs Xcode 26+, Tuist 4, and an iOS 26+ simulator.

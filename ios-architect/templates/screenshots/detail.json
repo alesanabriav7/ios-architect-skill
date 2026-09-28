@@ -1,0 +1,13 @@
+{
+  "workspace": "SampleApp.xcworkspace",
+  "scheme": "SampleApp",
+  "simulator": "iPhone 17 Pro",
+  "derivedDataPath": "Derived/Screenshots",
+  "outputDir": "screenshots/current",
+  "screenshotName": "detail",
+  "waitSeconds": 3,
+  "launchEnv": {
+    "APP_USE_PREVIEW_DATA": "1",
+    "APP_INITIAL_ROUTE": "sampleapp://notes/fixture-2"
+  }
+}
