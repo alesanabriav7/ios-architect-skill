@@ -18,7 +18,16 @@ Each app names its own (Cifro uses `CIFRO_*`). If the app has no such contract, 
 
 ## 2. Capture
 
-Deterministic: build, install, fixed status bar, launch env, capture.
+Use the cheapest capture path that preserves the required screen and comparison conditions. Follow the repository's build and launch contract.
+
+- Select a suitable simulator with `xcrun simctl list devices booted` once and reuse its explicit UDID. Boot only when needed, then wait with `xcrun simctl bootstatus <UDID> -b`; avoid fixed boot sleeps.
+- If the required screen is already visible, capture directly with `xcrun simctl io <UDID> screenshot <path>.png`. No rebuild, install, relaunch, Simulator window opening, or delay is needed just to capture the current screen. This also works for an already prepared deterministic scene.
+- After code changes, build once and install that product once with `xcrun simctl install <UDID> <app-path>`. Reuse the build and DerivedData for subsequent screens and variants. Reinstall only when the build changes or the app is missing. Uninstalling deletes app data; reserve it and simulator erasure for a required fresh state. Clean builds, Tuist generation, and tests belong to the repository's quality gates, not each capture.
+- To change a launch scenario, reuse the installed app and run `env SIMCTL_CHILD_<KEY>=<VALUE> xcrun simctl launch --terminate-running-process <UDID> <bundle-id>` with the app's documented variables. Set appearance, text size, and status bar once for the comparison conditions.
+- Launch success does not prove rendering is complete. Capture and inspect; if loading or a transition makes the capture invalid, wait briefly and recapture only that screen. Avoid unconditional sleeps and repeated captures of an already verified state. Keep distinct filenames when comparing earlier images.
+- Use a capture wrapper when it supplies needed setup. Check its behavior: `--skip-build` may still reinstall, reset data, relaunch, or sleep. Prefer direct `simctl` for repeated checks rather than repeating that preparation or building into a second DerivedData directory.
+
+For setup with `screenshots-ios`:
 
 ```bash
 screenshots-ios --context screenshots/<screen>.json            # first screen builds
@@ -29,10 +38,8 @@ screenshots-ios --scheme <S> --workspace <W>.xcworkspace --name <screen> --outpu
 
 - `screenshots-ios` is on `PATH`. Otherwise run `npx tsx ~/dev/screenshots-ios/src/capture.ts`.
 - Output is `<outputDir>/<name>-<timestamp>.png`. Pair files by `<name>` prefix, not by exact filename.
-- For a quick look at an app that's already running, with no determinism, use `xcrun simctl io booted screenshot <path>.png`.
-  Check first with `xcrun simctl list devices booted`.
-- Variants: `xcrun simctl ui booted appearance dark|light`, and `xcrun simctl ui booted content_size extra-extra-extra-large`
-  (reset to `large` afterwards). Record which variant each file shows.
+- Variants: `xcrun simctl ui <UDID> appearance dark|light`, and `xcrun simctl ui <UDID> content_size extra-extra-extra-large`
+  (restore the previous appearance and text size afterwards). Record which variant each file shows.
 
 ## 3. Compare
 
